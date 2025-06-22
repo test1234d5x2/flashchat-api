@@ -10,7 +10,7 @@ import java.util.UUID;
 public class Follow {
 
     @Id
-    private UUID id;
+    private String id;
 
     @ManyToOne
     @JoinColumn (name = "follower_user_id")
@@ -24,14 +24,14 @@ public class Follow {
 
 
     public Follow() {
-        this.id = UUID.randomUUID();
+        this.id = UUID.randomUUID().toString();
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 

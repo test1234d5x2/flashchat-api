@@ -10,7 +10,7 @@ import java.util.UUID;
 public class Like {
 
     @Id
-    private UUID id;
+    private String id;
 
     @ManyToOne
     @JoinColumn (name = "post_id")
@@ -24,14 +24,14 @@ public class Like {
 
 
     public Like() {
-        this.id = UUID.randomUUID();
+        this.id = UUID.randomUUID().toString();
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 

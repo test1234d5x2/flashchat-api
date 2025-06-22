@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -39,15 +39,34 @@ public class UserService {
     }
 
     public boolean login(LoginDetails loginDetails) {
-        return userRepo.findByUsernameAndPassword(loginDetails.getUsername(), loginDetails.getPassword()).isEmpty();
+        Optional<User> u = userRepo.findByUsername(loginDetails.getUsername());
+
+        if (u.isEmpty()) {
+            return false;
+        }
+
+        if (!passwordEncoder.matches(loginDetails.getPassword(), u.get().getPassword())) {
+            return false;
+        }
+
+        System.out.println(u.get().getId());
+        return true;
     }
 
-    public boolean deleteUser(UUID id) {
+    public boolean deleteUser(String id) {
         if (userRepo.findById(id).isEmpty()) {
             return false;
         }
 
         userRepo.deleteById(id);
         return true;
+    }
+
+    public boolean userExists(String id) {
+        return userRepo.findById(id).isEmpty();
+    }
+
+    public User findById(String id) {
+        return userRepo.findById(id).orElse(null);
     }
 }

@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Report {
 
     @Id
-    private UUID id;
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -31,15 +31,15 @@ public class Report {
     private Date dateReported;
 
     public Report() {
-        this.id = UUID.randomUUID();
+        this.id = UUID.randomUUID().toString();
         this.dateReported = new Date();
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 

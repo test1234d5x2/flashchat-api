@@ -25,9 +25,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users").authenticated()
-                        .anyRequest().authenticated()
+                                .anyRequest().permitAll()
+//                          .requestMatchers("/api/v1/users").permitAll() // TODO: REMOVE. For development without authentication.
+//                        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/api/v1/users/login").permitAll()
+//                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users").authenticated()
+//                        .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
 
