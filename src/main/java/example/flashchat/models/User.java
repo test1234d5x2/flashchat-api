@@ -40,4 +40,16 @@ public class User extends LoginDetails {
     public String getId() {
         return id;
     }
+
+    public List<Like> getLikedPosts() {
+        return likedPosts;
+    }
+
+    public List<Follow> getFollowers() {
+        return followers;
+    }
+
+    public List<Follow> getFollowedBy() {
+        return followedBy;
+    }
 }

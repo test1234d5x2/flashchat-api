@@ -6,6 +6,10 @@ import example.flashchat.services.FollowService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.ArrayList;
+import example.flashchat.models.Follow;
+import example.flashchat.requestStructures.IdRequest;
 
 @RestController
 @RequestMapping("api/v1/follows")
@@ -68,5 +72,40 @@ public class FollowController {
         }
 
         return followService.removeFollow(follower, followed);
+    }
+
+
+    @GetMapping("/followers")
+    public List<Follow> getFollowers(@RequestBody IdRequest idRequest) {
+        final String userId = idRequest.id;
+
+        if (userId.isEmpty()) {
+            // Empty check.
+            return new ArrayList<>();
+        }
+
+        if (!userService.userExists(userId)) {
+            // User existence check.
+            return new ArrayList<>();
+        }
+
+        return userService.findById(userId).getFollowers();
+    }
+
+    @GetMapping("/following")
+    public List<Follow> getFollowing(@RequestBody IdRequest idRequest) {
+        final String userId = idRequest.id;
+
+        if (userId.isEmpty()) {
+            // Empty check.
+            return new ArrayList<>();
+        }
+
+        if (!userService.userExists(userId)) {
+            // User existence check.
+            return new ArrayList<>();
+        }
+
+        return userService.findById(userId).getFollowedBy();
     }
 }

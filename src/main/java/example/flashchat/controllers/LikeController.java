@@ -1,13 +1,18 @@
 package example.flashchat.controllers;
 
+import example.flashchat.models.Like;
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
+import example.flashchat.requestStructures.IdRequest;
 import example.flashchat.requestStructures.PostAndLikeRequest;
 import example.flashchat.services.LikeService;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/likes")
@@ -78,5 +83,23 @@ public class LikeController {
         }
 
         return likeService.deleteLike(p, u);
+    }
+
+
+    @GetMapping
+    public List<Like> getLikedPosts(@RequestBody IdRequest idRequest) {
+        final String userId = idRequest.id;
+
+        if (userId.isEmpty()) {
+            // Empty check.
+            return new ArrayList<>();
+        }
+
+        if (!userService.userExists(userId)) {
+            // User existence check.
+            return new ArrayList<>();
+        }
+
+        return userService.findById(userId).getLikedPosts();
     }
 }
