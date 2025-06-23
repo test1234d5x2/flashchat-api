@@ -25,16 +25,16 @@ public class PostController {
 
     @PostMapping
     public boolean createPost(@RequestBody PostRequest post) {
-        String user_id = post.user_id;
-        if (user_id.isEmpty()) {
+        String userId = post.userId;
+        if (userId.isEmpty()) {
             return false;
         }
 
-        if (userService.userExists(user_id)) {
+        if (userService.userExists(userId)) {
             return false;
         }
 
-        User u = userService.findById(user_id);
+        User u = userService.findById(userId);
         Post p = new Post();
         p.setPost(post.post);
         p.setUser(u);
@@ -44,37 +44,37 @@ public class PostController {
 
     @GetMapping
     public List<Post> getPosts(@RequestBody IdRequest idRequest) {
-        String user_id = idRequest.id;
-        if (user_id.isEmpty()) {
+        String userId = idRequest.id;
+        if (userId.isEmpty()) {
             return new ArrayList<>();
         }
 
-        if (userService.userExists(user_id)) {
+        if (userService.userExists(userId)) {
             return new ArrayList<>();
         }
 
-        return postService.getPosts(user_id);
+        return postService.getPosts(userId);
     }
 
     @DeleteMapping
     public boolean deletePost(@RequestBody PostAndUserRequest postAndUserRequest) {
-        String post_id = postAndUserRequest.post_id;
-        String user_id = postAndUserRequest.user_id;
+        String postId = postAndUserRequest.postId;
+        String userId = postAndUserRequest.userId;
 
-        if (user_id.isEmpty() || post_id.isEmpty()) {
+        if (userId.isEmpty() || postId.isEmpty()) {
             return false;
         }
 
-        if (userService.userExists(user_id) || !postService.postExists(post_id)) {
+        if (userService.userExists(userId) || !postService.postExists(postId)) {
             return false;
         }
 
-        Post p = postService.retrievePostById(post_id);
+        Post p = postService.retrievePostById(postId);
 
-        if (!(p.getUser().getId().equals(user_id))) {
+        if (!(p.getUser().getId().equals(userId))) {
             return false;
         }
 
-        return postService.deletePost(post_id);
+        return postService.deletePost(postId);
     }
 }

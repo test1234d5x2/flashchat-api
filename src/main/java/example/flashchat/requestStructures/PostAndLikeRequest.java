@@ -1,6 +1,6 @@
 package example.flashchat.requestStructures;
 
-public class PostRequest {
+public class PostAndLikeRequest {
+    public String postId;
     public String userId;
-    public String post;
 }

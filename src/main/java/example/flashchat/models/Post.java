@@ -23,7 +23,7 @@ public class Post {
     private Date datePosted;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     @NotNull
     private User user;
 

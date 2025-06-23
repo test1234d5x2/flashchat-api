@@ -14,7 +14,7 @@ public class Media {
     private String id;
 
     @ManyToOne
-    @JoinColumn (name = "post_id")
+    @JoinColumn (name = "postId")
     @NotNull
     private Post post;
 

@@ -13,12 +13,12 @@ public class Like {
     private String id;
 
     @ManyToOne
-    @JoinColumn (name = "post_id")
+    @JoinColumn (name = "postId")
     @NotNull
     private Post postLiked;
 
     @ManyToOne
-    @JoinColumn (name = "user_id")
+    @JoinColumn (name = "userId")
     @NotNull
     private User likedBy;
 
