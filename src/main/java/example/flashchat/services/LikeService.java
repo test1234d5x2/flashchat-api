@@ -15,11 +15,7 @@ public class LikeService {
     @Autowired
     private LikeRepo likeRepo;
 
-    public boolean addLike(Post post, User user) {
-        Like l = new Like();
-        l.setLikedBy(user);
-        l.setPostLiked(post);
-
+    public boolean addLike(Like l) {
         likeRepo.save(l);
         return true;
     }

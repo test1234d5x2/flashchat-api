@@ -96,7 +96,6 @@ public class MediaControllers {
         }
 
         Media m = mediaService.getMedia(mediaId);
-        File file = new File(m.getFilePath());
 
         return m;
     }

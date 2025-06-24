@@ -44,7 +44,11 @@ public class FollowController {
             return false;
         }
 
-        return followService.addFollow(follower, followed);
+        Follow f = new Follow();
+        f.setFollower(follower);
+        f.setFollowed(followed);
+
+        return followService.addFollow(f);
     }
 
 

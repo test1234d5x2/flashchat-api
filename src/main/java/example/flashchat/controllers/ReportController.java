@@ -14,6 +14,7 @@ import example.flashchat.services.UserService;
 import example.flashchat.services.ReportService;
 import example.flashchat.models.User;
 import example.flashchat.models.Post;
+import example.flashchat.models.Report;
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -47,7 +48,12 @@ public class ReportController {
         User reporter = userService.findById(reporterId);
         Post post = postService.retrievePostById(postId);
 
-        return reportService.addReport(reporter, post, reason);
+        Report report = new Report();
+        report.setReporter(reporter);
+        report.setPost(post);
+        report.setReason(reason);
+
+        return reportService.addReport(report);
     }
 
     @DeleteMapping

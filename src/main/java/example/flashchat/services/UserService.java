@@ -34,6 +34,7 @@ public class UserService {
         }
         catch (Exception e) {
             // Implement logging.
+            System.out.println("OK");
             return false;
         }
     }
@@ -49,7 +50,6 @@ public class UserService {
             return false;
         }
 
-        System.out.println(u.get().getId());
         return true;
     }
 
@@ -63,7 +63,7 @@ public class UserService {
     }
 
     public boolean userExists(String id) {
-        return userRepo.findById(id).isEmpty();
+        return userRepo.findById(id).isPresent();
     }
 
     public User findById(String id) {

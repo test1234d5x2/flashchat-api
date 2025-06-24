@@ -55,7 +55,11 @@ public class LikeController {
             return false;
         }
 
-        return likeService.addLike(p, u);
+        Like l = new Like();
+        l.setLikedBy(u);
+        l.setPostLiked(p);
+
+        return likeService.addLike(l);
     }
 
 

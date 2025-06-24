@@ -2,9 +2,7 @@ package example.flashchat.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import example.flashchat.models.Post;
 import example.flashchat.models.Report;
-import example.flashchat.models.User;
 import example.flashchat.repositories.ReportRepo;
 
 @Service
@@ -13,11 +11,7 @@ public class ReportService {
     @Autowired
     private ReportRepo reportRepo;
 
-    public boolean addReport(User reporter, Post post, String reason) {
-        Report report = new Report();
-        report.setReporter(reporter);
-        report.setPost(post);
-        report.setReason(reason);
+    public boolean addReport(Report report) {
         reportRepo.save(report);
         return true;
     }

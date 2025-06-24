@@ -30,7 +30,7 @@ public class PostController {
             return false;
         }
 
-        if (userService.userExists(userId)) {
+        if (!userService.userExists(userId)) {
             return false;
         }
 
@@ -49,7 +49,7 @@ public class PostController {
             return new ArrayList<>();
         }
 
-        if (userService.userExists(userId)) {
+        if (!userService.userExists(userId)) {
             return new ArrayList<>();
         }
 
@@ -65,7 +65,7 @@ public class PostController {
             return false;
         }
 
-        if (userService.userExists(userId) || !postService.postExists(postId)) {
+        if (!userService.userExists(userId) || !postService.postExists(postId)) {
             return false;
         }
 

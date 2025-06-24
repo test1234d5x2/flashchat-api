@@ -26,8 +26,8 @@ public class PostService {
         return true;
     }
 
-    public List<Post> getPosts(String user_id) {
-        return postRepo.findByUserId(user_id);
+    public List<Post> getPosts(String userId) {
+        return postRepo.findByUserId(userId);
     }
 
     public boolean deletePost(String id) {

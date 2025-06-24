@@ -14,11 +14,7 @@ public class FollowService {
     @Autowired
     private FollowRepo followRepo;
 
-    public boolean addFollow(User follower, User followed) {
-        Follow f = new Follow();
-        f.setFollower(follower);
-        f.setFollowed(followed);
-
+    public boolean addFollow(Follow f) {
         followRepo.save(f);
         return true;
     }
