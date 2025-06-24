@@ -1,12 +1,13 @@
 package example.flashchat.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.stereotype.Service;
 import example.flashchat.models.Post;
 import example.flashchat.models.Report;
 import example.flashchat.models.User;
 import example.flashchat.repositories.ReportRepo;
 
+@Service
 public class ReportService {
 
     @Autowired

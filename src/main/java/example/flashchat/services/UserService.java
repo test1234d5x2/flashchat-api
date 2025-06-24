@@ -1,6 +1,5 @@
 package example.flashchat.services;
 
-import example.flashchat.models.Like;
 import example.flashchat.models.LoginDetails;
 import example.flashchat.models.User;
 import example.flashchat.repositories.UserRepo;
@@ -8,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
