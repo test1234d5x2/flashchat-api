@@ -3,8 +3,6 @@ package example.flashchat.controllers;
 import example.flashchat.models.Like;
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
-import example.flashchat.requestStructures.IdRequest;
-import example.flashchat.requestStructures.PostAndLikeRequest;
 import example.flashchat.services.LikeService;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
@@ -28,10 +26,7 @@ public class LikeController {
     private PostService postService;
 
     @PostMapping
-    public boolean addLike(@RequestBody PostAndLikeRequest postAndLikeRequest) {
-        final String postId = postAndLikeRequest.postId;
-        final String userId = postAndLikeRequest.userId;
-
+    public boolean addLike(@RequestParam String postId, @RequestParam String userId) {
         if (postId.isEmpty() || userId.isEmpty()) {
             // Empty check.
             return false;
@@ -64,10 +59,7 @@ public class LikeController {
 
 
     @DeleteMapping
-    public boolean deleteLike(@RequestBody PostAndLikeRequest postAndLikeRequest) {
-        final String postId = postAndLikeRequest.postId;
-        final String userId = postAndLikeRequest.userId;
-
+    public boolean deleteLike(@RequestParam String postId, @RequestParam String userId) {
         if (postId.isEmpty() || userId.isEmpty()) {
             // Empty check.
             return false;
@@ -91,9 +83,7 @@ public class LikeController {
 
 
     @GetMapping
-    public List<Like> getLikedPosts(@RequestBody IdRequest idRequest) {
-        final String userId = idRequest.id;
-
+    public List<Like> getLikedPosts(@RequestParam String userId) {
         if (userId.isEmpty()) {
             // Empty check.
             return new ArrayList<>();

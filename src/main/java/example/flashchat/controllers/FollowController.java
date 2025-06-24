@@ -1,7 +1,6 @@
 package example.flashchat.controllers;
 
 import example.flashchat.models.User;
-import example.flashchat.requestStructures.FollowRequest;
 import example.flashchat.services.FollowService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.ArrayList;
 import example.flashchat.models.Follow;
-import example.flashchat.requestStructures.IdRequest;
 
 @RestController
 @RequestMapping("api/v1/follows")
@@ -22,10 +20,7 @@ public class FollowController {
     private UserService userService;
 
     @PostMapping
-    public boolean follow(@RequestBody FollowRequest followRequest) {
-        final String followerId = followRequest.followerId;
-        final String followedId = followRequest.followedId;
-
+    public boolean follow(@RequestParam String followerId, @RequestParam String followedId) {
         if (followedId.isEmpty() || followerId.isEmpty()) {
             // Empty check.
             return false;
@@ -53,10 +48,7 @@ public class FollowController {
 
 
     @DeleteMapping
-    public boolean removeFollow(@RequestBody FollowRequest followRequest) {
-        final String followerId = followRequest.followerId;
-        final String followedId = followRequest.followedId;
-
+    public boolean removeFollow(@RequestParam String followerId, @RequestParam String followedId) {
         if (followedId.isEmpty() || followerId.isEmpty()) {
             // Empty check.
             return false;
@@ -80,9 +72,7 @@ public class FollowController {
 
 
     @GetMapping("/followers")
-    public List<Follow> getFollowers(@RequestBody IdRequest idRequest) {
-        final String userId = idRequest.id;
-
+    public List<Follow> getFollowers(@RequestParam String userId) {
         if (userId.isEmpty()) {
             // Empty check.
             return new ArrayList<>();
@@ -97,9 +87,7 @@ public class FollowController {
     }
 
     @GetMapping("/following")
-    public List<Follow> getFollowing(@RequestBody IdRequest idRequest) {
-        final String userId = idRequest.id;
-
+    public List<Follow> getFollowing(@RequestParam String userId) {
         if (userId.isEmpty()) {
             // Empty check.
             return new ArrayList<>();

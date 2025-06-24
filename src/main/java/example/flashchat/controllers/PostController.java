@@ -2,9 +2,6 @@ package example.flashchat.controllers;
 
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
-import example.flashchat.requestStructures.IdRequest;
-import example.flashchat.requestStructures.PostAndUserRequest;
-import example.flashchat.requestStructures.PostRequest;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +21,7 @@ public class PostController {
     private UserService userService;
 
     @PostMapping
-    public boolean createPost(@RequestBody PostRequest post) {
-        String userId = post.userId;
+    public boolean createPost(@RequestParam String userId, @RequestParam String post) {
         if (userId.isEmpty()) {
             return false;
         }
@@ -36,15 +32,14 @@ public class PostController {
 
         User u = userService.findById(userId);
         Post p = new Post();
-        p.setPost(post.post);
+        p.setPost(post);
         p.setUser(u);
 
         return postService.createPost(p);
     }
 
     @GetMapping
-    public List<Post> getPosts(@RequestBody IdRequest idRequest) {
-        String userId = idRequest.id;
+    public List<Post> getPosts(@RequestParam String userId) {
         if (userId.isEmpty()) {
             return new ArrayList<>();
         }
@@ -57,10 +52,7 @@ public class PostController {
     }
 
     @DeleteMapping
-    public boolean deletePost(@RequestBody PostAndUserRequest postAndUserRequest) {
-        String postId = postAndUserRequest.postId;
-        String userId = postAndUserRequest.userId;
-
+    public boolean deletePost(@RequestParam String postId, @RequestParam String userId) {
         if (userId.isEmpty() || postId.isEmpty()) {
             return false;
         }
