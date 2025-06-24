@@ -57,14 +57,6 @@ public class UserServiceTest {
         verify(userRepo, times(1)).save(newUser);
     }
 
-    @Test
-    public void testCreateUserAlreadyExists() {
-        when(userRepo.findByUsername(testUser.getUsername())).thenReturn(Optional.of(testUser));
-        boolean result = userService.createUser(testUser);
-        assertFalse(result);
-        verify(userRepo, times(0)).save(testUser);
-    }
-
     @Test 
     public void testLoginCorrect() {
         when(passwordEncoder.encode(testUser.getPassword())).thenReturn(testUser.getPassword());

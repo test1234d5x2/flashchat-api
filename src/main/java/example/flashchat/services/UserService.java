@@ -22,21 +22,9 @@ public class UserService {
     }
 
     public boolean createUser(User user) {
-        if (userRepo.findByUsername(user.getUsername()).isPresent()) {
-            return false;
-        }
-
-        try {
-
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userRepo.save(user);
-            return true;
-        }
-        catch (Exception e) {
-            // Implement logging.
-            System.out.println("OK");
-            return false;
-        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepo.save(user);
+        return true;
     }
 
     public boolean login(LoginDetails loginDetails) {

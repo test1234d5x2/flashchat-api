@@ -16,10 +16,20 @@ public class UserController {
 
     @PostMapping
     public boolean createUser(@RequestBody LoginDetails loginDetails) {
+
+        if (loginDetails.getUsername().isEmpty() || loginDetails.getPassword().isEmpty()) {
+            return false;
+        }
+
         User u = new User();
         u.setUsername(loginDetails.getUsername());
         u.setPassword(loginDetails.getPassword());
 
+        if (userService.userExists(u.getUsername())) {
+            return false;
+        }
+
+        System.out.println("Here");
         return userService.createUser(u);
     }
 
