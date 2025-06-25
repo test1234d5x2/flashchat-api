@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +22,7 @@ import example.flashchat.services.PostService;
 
 @RestController
 @RequestMapping("/api/v1/media")
-public class MediaControllers {
+public class MediaController {
 
     @Autowired
     private MediaService mediaService;
@@ -29,12 +30,10 @@ public class MediaControllers {
     @Autowired
     private PostService postService;
 
-    final String UPLOAD_DIR = "/uploads/";
-
     @PostMapping
     public boolean addMedia(@RequestParam String postId, @RequestParam MultipartFile file) {
 
-        if (file.isEmpty() || postId == null) {
+        if (file == null || postId.isEmpty()) {
             // Empty checks
             return false;
         }
@@ -45,8 +44,7 @@ public class MediaControllers {
         }
 
         Post post = postService.retrievePostById(postId);
-        String dirPath = Utils.checkDirectoryExists(Utils.getProjectRoot() + UPLOAD_DIR);
-        String filePath = dirPath + "/" + file.getOriginalFilename();
+        final String filePath = Utils.getFilePath(file.getOriginalFilename());
 
         Media media = new Media();
         media.setPost(post);
@@ -60,7 +58,12 @@ public class MediaControllers {
                 // TODO: Log error
                 mediaService.deleteMedia(media.getId());
                 e.printStackTrace();
+
+                return false;
             }
+        }
+        else {
+            return false;
         }
 
         return true;

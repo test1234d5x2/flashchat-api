@@ -3,6 +3,9 @@ package example.flashchat;
 import java.io.File;
 
 public class Utils {
+    final static String UPLOAD_DIR = "/uploads/";
+
+
     public static String getProjectRoot() {
         return System.getProperty("user.dir");
     }
@@ -14,5 +17,11 @@ public class Utils {
             file.setExecutable(false);
         }
         return file.getAbsolutePath();
+    }
+
+    public static String getFilePath(String filename) {
+        String dirPath = Utils.checkDirectoryExists(Utils.getProjectRoot() + UPLOAD_DIR);
+        String filePath = dirPath + "/" + filename;
+        return filePath;
     }
 }
