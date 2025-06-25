@@ -29,7 +29,6 @@ public class UserController {
             return false;
         }
 
-        System.out.println("Here");
         return userService.createUser(u);
     }
 

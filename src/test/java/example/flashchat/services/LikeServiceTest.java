@@ -3,7 +3,6 @@ package example.flashchat.services;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Date;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +38,6 @@ public class LikeServiceTest {
         testPost = new Post();
         testPost.setUser(testUser);
         testPost.setPost("test post");
-        testPost.setDatePosted(new Date());
 
         testLike = new Like();
         testLike.setLikedBy(testUser);

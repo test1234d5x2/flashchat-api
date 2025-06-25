@@ -62,10 +62,6 @@ public class Post {
         return datePosted;
     }
 
-    public void setDatePosted(Date datePosted) {
-        this.datePosted = datePosted;
-    }
-
     public User getUser() {
         return user;
     }

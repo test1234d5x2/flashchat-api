@@ -26,7 +26,7 @@ public class PostController {
             return false;
         }
 
-        if (!userService.userExists(userId)) {
+        if (!userService.userExists(userId) || post.isEmpty()) {
             return false;
         }
 

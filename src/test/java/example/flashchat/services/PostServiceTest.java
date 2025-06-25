@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +39,6 @@ public class PostServiceTest {
         testPost = new Post();
         testPost.setUser(testUser);
         testPost.setPost("test post");
-        testPost.setDatePosted(new Date());
     }
 
     @Test

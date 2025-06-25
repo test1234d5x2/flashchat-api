@@ -3,8 +3,6 @@ package example.flashchat.services;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Date;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -38,7 +36,6 @@ public class ReportServiceTest {
         testPost = new Post();
         testPost.setUser(testUser);
         testPost.setPost("test post");
-        testPost.setDatePosted(new Date());
 
         testReport = new Report();
         testReport.setReporter(testUser);

@@ -31,12 +31,12 @@ public class LikeController {
             // Empty check.
             return false;
         }
-
+        
         if (!postService.postExists(postId) || !userService.userExists(userId)) {
             // Post and user existence check.
             return false;
         }
-
+        
         Post p = postService.retrievePostById(postId);
         User u = userService.findById(userId);
 
