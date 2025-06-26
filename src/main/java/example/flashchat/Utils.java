@@ -14,6 +14,7 @@ public class Utils {
         File file = new File(directory);
         if (!file.exists()) {
             file.mkdirs();
+            file.setWritable(true);
             file.setExecutable(false);
         }
         return file.getAbsolutePath();
