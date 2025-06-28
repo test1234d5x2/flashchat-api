@@ -32,6 +32,11 @@ public class User extends LoginDetails {
     @OneToMany(mappedBy = "reporter",orphanRemoval = true)
     private List<Report> reports = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user1", orphanRemoval = true)
+    private List<Chat> chatsAsUser1 = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user2", orphanRemoval = true)
+    private List<Chat> chatsAsUser2 = new ArrayList<>();
 
     public User() {
         this.id = UUID.randomUUID().toString();
@@ -51,5 +56,13 @@ public class User extends LoginDetails {
 
     public List<Follow> getFollowedBy() {
         return followedBy;
+    }
+
+    public List<Chat> getChatsAsUser1() {
+        return chatsAsUser1;
+    }
+
+    public List<Chat> getChatsAsUser2() {
+        return chatsAsUser2;
     }
 }
