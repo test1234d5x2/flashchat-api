@@ -1,11 +1,13 @@
 package example.flashchat.models;
 
+import java.util.*;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,6 +23,9 @@ public class Chat {
     @ManyToOne
     @JoinColumn(name = "userTwoId")
     private User user2;
+
+    @OneToMany(mappedBy = "chat", orphanRemoval = true)
+    private List<Message> messages = new ArrayList<>();
 
 
     public Chat() {
@@ -45,5 +50,9 @@ public class Chat {
 
     public User getUser2() {
         return user2;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
     }
 }

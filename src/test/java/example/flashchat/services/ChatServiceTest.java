@@ -60,6 +60,7 @@ public class ChatServiceTest {
     public void testChatExists() {
         when(chatRepo.findByUser1IdAndUser2Id(testUser1.getId(), testUser2.getId())).thenReturn(Optional.of(testChat));
         assertTrue(chatService.chatExists(testUser1, testUser2));
+        assertTrue(chatService.chatExists(testUser2, testUser1));
     }
 
     @Test

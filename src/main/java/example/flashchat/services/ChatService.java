@@ -28,12 +28,12 @@ public class ChatService {
         return chatRepo.findById(chatId).orElse(null);
     }
 
-    public boolean chatExists(String chatIdString) {
-        return chatRepo.existsById(chatIdString);
+    public boolean chatExists(String chatId) {
+        return chatRepo.existsById(chatId);
     }
 
     public boolean chatExists(User user1, User user2) {
-        return chatRepo.findByUser1IdAndUser2Id(user1.getId(), user2.getId()).isPresent();
+        return chatRepo.findByUser1IdAndUser2Id(user1.getId(), user2.getId()).isPresent() || chatRepo.findByUser1IdAndUser2Id(user2.getId(), user1.getId()).isPresent();
     }
 
     public boolean deleteChat(String chatId) {

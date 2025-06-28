@@ -38,6 +38,9 @@ public class User extends LoginDetails {
     @OneToMany(mappedBy = "user2", orphanRemoval = true)
     private List<Chat> chatsAsUser2 = new ArrayList<>();
 
+    @OneToMany(mappedBy = "sender", orphanRemoval = true)
+    private List<Message> messages = new ArrayList<>();
+
     public User() {
         this.id = UUID.randomUUID().toString();
     }
@@ -64,5 +67,9 @@ public class User extends LoginDetails {
 
     public List<Chat> getChatsAsUser2() {
         return chatsAsUser2;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
     }
 }
