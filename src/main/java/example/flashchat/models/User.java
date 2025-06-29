@@ -41,6 +41,12 @@ public class User extends LoginDetails {
     @OneToMany(mappedBy = "sender", orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "recepientUser", orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "actionUser", orphanRemoval = true)
+    private List<Notification> notificationsAsActionUser = new ArrayList<>();
+
     public User() {
         this.id = UUID.randomUUID().toString();
     }
@@ -71,5 +77,13 @@ public class User extends LoginDetails {
 
     public List<Message> getMessages() {
         return messages;
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public List<Notification> getNotificationsAsActionUser() {
+        return notificationsAsActionUser;
     }
 }
