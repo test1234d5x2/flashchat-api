@@ -5,7 +5,7 @@ import example.flashchat.models.User;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -40,5 +40,23 @@ public class UserController {
     @DeleteMapping
     public boolean deleteUser(@RequestParam String userId) {
         return userService.deleteUser(userId);
+    }
+
+    @GetMapping("/search/{searchQuery}")
+    public List<User> searchUsersGet(@PathVariable String searchQuery) {
+        if (searchQuery.isEmpty()) {
+            return List.of();
+        }
+
+        return userService.searchUsers(searchQuery);
+    }
+
+    @PostMapping("/search")
+    public List<User> searchUsersPost(@RequestParam String searchQuery) {
+        if (searchQuery.isEmpty()) {
+            return List.of();
+        }
+
+        return userService.searchUsers(searchQuery);
     }
 }
