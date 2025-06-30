@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "users")
@@ -55,26 +57,32 @@ public class User extends LoginDetails {
         return id;
     }
 
+    @JsonIgnore
     public List<Like> getLikedPosts() {
         return likedPosts;
     }
 
+    @JsonIgnore
     public List<Follow> getFollowers() {
         return followers;
     }
 
+    @JsonIgnore
     public List<Follow> getFollowedBy() {
         return followedBy;
     }
 
+    @JsonIgnore
     public List<Chat> getChatsAsUser1() {
         return chatsAsUser1;
     }
 
+    @JsonIgnore
     public List<Chat> getChatsAsUser2() {
         return chatsAsUser2;
     }
 
+    @JsonIgnore
     public List<Message> getMessages() {
         return messages;
     }
@@ -83,6 +91,7 @@ public class User extends LoginDetails {
         return notifications;
     }
 
+    @JsonIgnore
     public List<Notification> getNotificationsAsActionUser() {
         return notificationsAsActionUser;
     }
