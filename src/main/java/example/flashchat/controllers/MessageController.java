@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +31,11 @@ public class MessageController {
     private UserService userService;
 
     @PostMapping
-    public boolean createMessage(@RequestParam String chatId, @RequestParam String content, @RequestParam String userId) {
+    public boolean createMessage(@RequestBody MessageRequest request) {
+        String chatId = request.chatId;
+        String content = request.content;
+        String userId = request.userId;
+
         if (chatId.isEmpty() || content.isEmpty() || userId.isEmpty()) {
             // Empty fields check
             return false;
@@ -79,4 +84,11 @@ public class MessageController {
 
         return messageService.getMessagesByChatId(chatId);
     }
+}
+
+
+class MessageRequest {
+    public String chatId;
+    public String content;
+    public String userId;
 }

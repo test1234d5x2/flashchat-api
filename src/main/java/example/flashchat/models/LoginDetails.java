@@ -1,5 +1,7 @@
 package example.flashchat.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotBlank;
@@ -26,6 +28,7 @@ public class LoginDetails {
         this.password = password;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
