@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,8 +58,8 @@ public class ChatController {
         return chatService.createChat(chat);
     }
 
-    @GetMapping
-    public List<Chat> getChats(@RequestParam String userId) {
+    @GetMapping("/userId/{userId}")
+    public List<Chat> getChats(@PathVariable String userId) {
         if (userId.isEmpty()) {
             // Check if the user id is empty
             return null;
@@ -75,6 +76,72 @@ public class ChatController {
         return chats;
     }
 
+    @GetMapping("/chatId/{chatId}")
+    public Chat getChatViaId(@PathVariable String chatId) {
+        if (chatId.isEmpty()) {
+            // Check if the chat id is empty
+            return null;
+        }
+
+        if (!chatService.chatExists(chatId)) {
+            // Check if the chat is not found
+            return null;
+        }
+
+        System.out.println(chatService.getChat(chatId));
+        return chatService.getChat(chatId);
+    }
+
+    // @PostMapping("/getChat")
+    // public Chat getChat(@RequestParam String user1Id, @RequestParam String user2Id) {
+    //     if (user1Id.isEmpty() || user2Id.isEmpty()) {
+    //         // Check if the user ids are empty
+    //         return null;
+    //     }
+
+    //     if (!userService.userExists(user1Id) || !userService.userExists(user2Id)) {
+    //         // Check if the users are not found
+    //         return null;
+    //     }
+
+    //     User user1 = userService.findById(user1Id);
+    //     User user2 = userService.findById(user2Id);
+
+    //     return chatService.getChat(user1, user2);
+    // }
+
+    @PostMapping("/getChat")
+    public Chat getChat(@RequestBody ChatRequest request) {
+        String user1Id = request.user1Id;
+        String user2Id = request.user2Id;
+
+        if (user1Id.isEmpty() || user2Id.isEmpty()) {
+            // Check if the user ids are empty
+            return null;
+        }
+
+        if (user1Id.equals(user2Id)) {
+            // Check if the users are the same
+            return null;
+        }
+
+        if (!userService.userExists(user1Id) || !userService.userExists(user2Id)) {
+            // Check if the users are not found
+            return null;
+        }
+
+        User user1 = userService.findById(user1Id);
+        User user2 = userService.findById(user2Id);
+
+        if (!chatService.chatExists(user1, user2)) {
+            // If the chat does not exist, create it
+            if (!createChat(user1.getId(), user2.getId())) {
+                return null;
+            }
+        }
+
+        return chatService.getChat(user1, user2);
+    }
 
     @DeleteMapping("/{chatId}")
     public boolean deleteChat(@PathVariable String chatId, @RequestParam String userId) {
@@ -101,4 +168,10 @@ public class ChatController {
 
         return chatService.deleteChat(chatId);
     }
+}
+
+
+class ChatRequest {
+    public String user1Id;
+    public String user2Id;
 }

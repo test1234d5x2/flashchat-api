@@ -3,6 +3,8 @@ package example.flashchat.models;
 import java.util.*;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -40,6 +42,7 @@ public class Chat {
         this.user1 = user1;
     }
 
+    @JsonIgnore
     public User getUser1() {
         return user1;
     }
@@ -48,6 +51,7 @@ public class Chat {
         this.user2 = user2;
     }
 
+    @JsonIgnore
     public User getUser2() {
         return user2;
     }

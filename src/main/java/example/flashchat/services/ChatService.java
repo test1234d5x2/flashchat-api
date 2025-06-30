@@ -28,6 +28,20 @@ public class ChatService {
         return chatRepo.findById(chatId).orElse(null);
     }
 
+    public Chat getChat(User user1, User user2) {
+        Chat chat = chatRepo.findByUser1IdAndUser2Id(user1.getId(), user2.getId()).orElse(null);
+        if (chat != null) {
+            return chat;
+        }
+
+        chat = chatRepo.findByUser1IdAndUser2Id(user2.getId(), user1.getId()).orElse(null);
+        if (chat != null) {
+            return chat;
+        }
+
+        return null;
+    } // TODO: Needs testing.
+
     public boolean chatExists(String chatId) {
         return chatRepo.existsById(chatId);
     }

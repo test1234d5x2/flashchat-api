@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -51,6 +52,7 @@ public class Message {
         this.chat = chat;
     }
 
+    @JsonIgnore
     public Chat getChat() {
         return chat;
     }
@@ -59,7 +61,12 @@ public class Message {
         this.sender = sender;
     }
 
+    @JsonIgnore
     public User getSender() {
         return sender;
+    }
+
+    public String getSenderId() {
+        return sender.getId();
     }
 }

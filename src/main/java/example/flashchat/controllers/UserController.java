@@ -49,14 +49,5 @@ public class UserController {
         }
 
         return userService.searchUsers(searchQuery);
-    }
-
-    @PostMapping("/search")
-    public List<User> searchUsersPost(@RequestParam String searchQuery) {
-        if (searchQuery.isEmpty()) {
-            return List.of();
-        }
-
-        return userService.searchUsers(searchQuery);
-    }
+    } // TODO: Needs testing.
 }
