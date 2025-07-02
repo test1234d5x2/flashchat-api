@@ -34,4 +34,8 @@ public class PostService {
         postRepo.deleteById(id);
         return true;
     }
+
+    public List<Post> allPosts() {
+        return postRepo.findAll();
+    }
 }

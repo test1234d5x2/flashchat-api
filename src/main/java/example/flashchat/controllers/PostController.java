@@ -21,8 +21,11 @@ public class PostController {
     private UserService userService;
 
     @PostMapping
-    public boolean createPost(@RequestParam String userId, @RequestParam String post) {
-        if (userId.isEmpty()) {
+    public boolean createPost(@RequestBody PostRequest request) {
+        String userId = request.userId;
+        String post = request.post;
+
+        if (userId.isEmpty() || post.isEmpty()) {
             return false;
         }
 
@@ -38,8 +41,21 @@ public class PostController {
         return postService.createPost(p);
     }
 
-    @GetMapping
-    public List<Post> getPosts(@RequestParam String userId) {
+    @GetMapping("/post/{postId}")
+    public Post getPost(@PathVariable String postId) {
+        if (postId.isEmpty()) {
+            return null;
+        }
+
+        if (!postService.postExists(postId)) {
+            return null;
+        }
+
+        return postService.retrievePostById(postId);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Post> getPosts(@PathVariable String userId) {
         if (userId.isEmpty()) {
             return new ArrayList<>();
         }
@@ -50,6 +66,19 @@ public class PostController {
 
         return postService.getPosts(userId);
     }
+
+    @GetMapping("/feed/{userId}")
+    public List<Post> getFeed(@PathVariable String userId) {
+        if (userId.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        if (!userService.userExists(userId)) {
+            return new ArrayList<>();
+        }
+
+        return postService.allPosts();
+    } // TODO: Implement recommendation servicelogic.
 
     @DeleteMapping
     public boolean deletePost(@RequestParam String postId, @RequestParam String userId) {
@@ -69,4 +98,10 @@ public class PostController {
 
         return postService.deletePost(postId);
     }
+}
+
+
+class PostRequest {
+    public String userId;
+    public String post;
 }

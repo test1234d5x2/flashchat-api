@@ -45,28 +45,35 @@ public class PostControllerTest {
         testPost.setPost("test post");
     }
 
+    private PostRequest createPostRequest(String userId, String post) {
+        PostRequest request = new PostRequest();
+        request.userId = userId;
+        request.post = post;
+        return request;
+    }
+
     @Test
     public void testCreatePost() {
         when(userService.userExists(testUser.getId())).thenReturn(true);
         when(postService.createPost(any(Post.class))).thenReturn(true);
-        assertTrue(postController.createPost(testUser.getId(), "test post"));
+        assertTrue(postController.createPost(createPostRequest(testUser.getId(), "test post")));
     }
 
     @Test
     public void testCreatePostEmptyUserId() {
-        assertFalse(postController.createPost("", "test post"));
+        assertFalse(postController.createPost(createPostRequest("", "test post")));
     }
 
     @Test
     public void testCreatePostInvalidUserId() {
         when(userService.userExists(testUser.getId())).thenReturn(false);
-        assertFalse(postController.createPost(testUser.getId(), "test post"));
+        assertFalse(postController.createPost(createPostRequest(testUser.getId(), "test post")));
     }
 
     @Test
     public void testCreatePostEmptyPost() {
         when(userService.userExists(testUser.getId())).thenReturn(true);
-        assertFalse(postController.createPost(testUser.getId(), ""));
+        assertFalse(postController.createPost(createPostRequest(testUser.getId(), "")));
     }
 
     @Test

@@ -53,6 +53,13 @@ public class LikeControllerTest {
         testPost.setPost("test post");
     }
 
+    private LikeRequest createLikeRequest(String postId, String userId) {
+        LikeRequest request = new LikeRequest();
+        request.postId = postId;
+        request.userId = userId;
+        return request;
+    }
+
     @Test
     public void testAddLike() {
         when(postService.postExists(testPost.getId())).thenReturn(true);
@@ -61,13 +68,13 @@ public class LikeControllerTest {
         when(likeService.likeExists(testPost, testUser2)).thenReturn(false);
         when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
         when(likeService.addLike(any(Like.class))).thenReturn(true);
-        assertTrue(likeController.addLike(testPost.getId(), testUser2.getId()));
+        assertTrue(likeController.addLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
 
     @Test
     public void testLikeAlreadExists() {
         when(likeService.likeExists(testPost, testUser2)).thenReturn(true);
-        assertFalse(likeController.addLike(testPost.getId(), testUser2.getId()));
+        assertFalse(likeController.addLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
 
     @Test
@@ -77,30 +84,30 @@ public class LikeControllerTest {
         when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
         when(userService.findById(testUser.getId())).thenReturn(testUser);
         when(likeService.likeExists(testPost, testUser)).thenReturn(false);
-        assertFalse(likeController.addLike(testPost.getId(), testUser.getId()));
+        assertFalse(likeController.addLike(createLikeRequest(testPost.getId(), testUser.getId())));
     }
 
     @Test
     public void testAddLikeInvalidPostId() {
         when(postService.postExists(testPost.getId())).thenReturn(false);
-        assertFalse(likeController.addLike(testPost.getId(), testUser2.getId()));
+        assertFalse(likeController.addLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
 
     @Test
     public void testAddLikeInvalidUserId() {
         when(postService.postExists(testPost.getId())).thenReturn(true);
         when(userService.userExists(testUser2.getId())).thenReturn(false);
-        assertFalse(likeController.addLike(testPost.getId(), testUser2.getId()));
+        assertFalse(likeController.addLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
 
     @Test
     public void testEmptyPostId() {
-        assertFalse(likeController.addLike("", testUser2.getId()));
+        assertFalse(likeController.addLike(createLikeRequest("", testUser2.getId())));
     }
 
     @Test
     public void testEmptyUserId() {
-        assertFalse(likeController.addLike(testPost.getId(), ""));
+        assertFalse(likeController.addLike(createLikeRequest(testPost.getId(), "")));
     }
 
     @Test
@@ -111,36 +118,36 @@ public class LikeControllerTest {
         when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
         when(likeService.likeExists(testPost, testUser2)).thenReturn(true);
         when(likeService.deleteLike(testPost, testUser2)).thenReturn(true);
-        assertTrue(likeController.deleteLike(testPost.getId(), testUser2.getId()));
+        assertTrue(likeController.deleteLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
 
     @Test
     public void testDeleteLikeInvalidLike() {
         when(likeService.likeExists(testPost, testUser2)).thenReturn(false);
-        assertFalse(likeController.deleteLike(testPost.getId(), testUser2.getId()));
+        assertFalse(likeController.deleteLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
 
     @Test
     public void testDeleteLikeInvalidPostId() {
         when(postService.postExists(testPost.getId())).thenReturn(false);
-        assertFalse(likeController.deleteLike(testPost.getId(), testUser2.getId()));
+        assertFalse(likeController.deleteLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
 
     @Test
     public void testDeleteLikeInvalidUserId() {
         when(postService.postExists(testPost.getId())).thenReturn(true);
         when(userService.userExists(testUser2.getId())).thenReturn(false);
-        assertFalse(likeController.deleteLike(testPost.getId(), testUser2.getId()));
+        assertFalse(likeController.deleteLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
     
     @Test
     public void testDeleteLikeEmptyPostId() {
-        assertFalse(likeController.deleteLike("", testUser2.getId()));
+        assertFalse(likeController.deleteLike(createLikeRequest("", testUser2.getId())));
     }
 
     @Test
     public void testDeleteLikeEmptyUserId() {
-        assertFalse(likeController.deleteLike(testPost.getId(), ""));
+        assertFalse(likeController.deleteLike(createLikeRequest(testPost.getId(), "")));
     }
 
     @Test

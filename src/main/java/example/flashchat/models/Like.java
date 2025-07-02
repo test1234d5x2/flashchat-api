@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table (name = "likes")
 public class Like {
@@ -12,11 +14,13 @@ public class Like {
     @Id
     private String id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn (name = "postId")
     @NotNull
     private Post postLiked;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn (name = "userId")
     @NotNull
@@ -49,5 +53,9 @@ public class Like {
 
     public User getLikedBy() {
         return likedBy;
+    }
+
+    public String getLikedById() {
+        return likedBy.getId();
     }
 }

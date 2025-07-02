@@ -20,7 +20,10 @@ public class FollowController {
     private UserService userService;
 
     @PostMapping
-    public boolean follow(@RequestParam String followerId, @RequestParam String followedId) {
+    public boolean follow(@RequestBody FollowRequest request) {
+        String followerId = request.followerId;
+        String followedId = request.followedId;
+
         if (followedId.isEmpty() || followerId.isEmpty()) {
             // Empty check.
             return false;
@@ -71,8 +74,8 @@ public class FollowController {
     }
 
 
-    @GetMapping("/followers")
-    public List<Follow> getFollowers(@RequestParam String userId) {
+    @GetMapping("/followers/{userId}")
+    public List<Follow> getFollowers(@PathVariable String userId) {
         if (userId.isEmpty()) {
             // Empty check.
             return new ArrayList<>();
@@ -86,8 +89,8 @@ public class FollowController {
         return userService.findById(userId).getFollowers();
     }
 
-    @GetMapping("/following")
-    public List<Follow> getFollowing(@RequestParam String userId) {
+    @GetMapping("/following/{userId}")
+    public List<Follow> getFollowing(@PathVariable String userId) {
         if (userId.isEmpty()) {
             // Empty check.
             return new ArrayList<>();
@@ -100,4 +103,37 @@ public class FollowController {
 
         return userService.findById(userId).getFollowedBy();
     }
+
+
+    @PostMapping("/check-follow")
+    public boolean checkFollow(@RequestBody FollowRequest request) {
+        String followerId = request.followerId;
+        String followedId = request.followedId;
+
+        if (followerId.isEmpty() || followedId.isEmpty()) {
+            // Empty check.
+            return false;
+        }
+
+        if (!userService.userExists(followerId) || !userService.userExists(followedId)) {
+            // Check users exist.
+            return false;
+        }
+
+        User follower = userService.findById(followerId);
+        User followed = userService.findById(followedId);
+
+        if (followService.followExists(follower, followed)) {
+            // Check if the follower follows the user.
+            return true;
+        }
+
+        return false;
+    }
+}
+
+
+class FollowRequest {
+    public String followerId;
+    public String followedId;
 }

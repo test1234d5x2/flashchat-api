@@ -57,6 +57,14 @@ public class MessageControllerTest {
         testMessage.setContent("test message");
     }
 
+    private MessageRequest createMessageRequest(String chatId, String content, String userId) {
+        MessageRequest request = new MessageRequest();
+        request.chatId = chatId;
+        request.content = content;
+        request.userId = userId;
+        return request;
+    }
+
     @Test
     public void testCreateMessage() {
         when(messageService.createMessage(any(Message.class))).thenReturn(true);
@@ -64,40 +72,40 @@ public class MessageControllerTest {
         when(chatService.getChat(testChat.getId())).thenReturn(testChat);
         when(userService.userExists(testUser.getId())).thenReturn(true);
         when(userService.findById(testUser.getId())).thenReturn(testUser);
-        assertTrue(messageController.createMessage(testChat.getId(), testMessage.getContent(), testUser.getId()));
+        assertTrue(messageController.createMessage(createMessageRequest(testChat.getId(), testMessage.getContent(), testUser.getId())));
     }
 
     @Test
     public void testCreateMessageUserNotPartOfChat() {
         when(messageService.createMessage(testMessage)).thenReturn(true);
-        assertFalse(messageController.createMessage(testChat.getId(), testMessage.getContent(), "not_part_of_chat"));
+        assertFalse(messageController.createMessage(createMessageRequest(testChat.getId(), testMessage.getContent(), "not_part_of_chat")));
     }
 
     @Test
     public void testCreateMessageChatNotFound() {
         when(chatService.chatExists("not_found")).thenReturn(false);
-        assertFalse(messageController.createMessage("not_found", testMessage.getContent(), testUser.getId()));
+        assertFalse(messageController.createMessage(createMessageRequest("not_found", testMessage.getContent(), testUser.getId())));
     }
 
     @Test
     public void testCreateMessageUserNotFound() {
         when(userService.userExists("not_found")).thenReturn(false);
-        assertFalse(messageController.createMessage(testChat.getId(), testMessage.getContent(), "not_found"));
+        assertFalse(messageController.createMessage(createMessageRequest(testChat.getId(), testMessage.getContent(), "not_found")));
     }
 
     @Test
     public void testCreateMessageEmptyChatId() {
-        assertFalse(messageController.createMessage("", testMessage.getContent(), testUser.getId()));
+        assertFalse(messageController.createMessage(createMessageRequest("", testMessage.getContent(), testUser.getId())));
     }
 
     @Test
     public void testCreateMessageEmptyContent() {
-        assertFalse(messageController.createMessage(testChat.getId(), "", testUser.getId()));
+        assertFalse(messageController.createMessage(createMessageRequest(testChat.getId(), "", testUser.getId())));
     }
 
     @Test
     public void testCreateMessageEmptyUserId() {
-        assertFalse(messageController.createMessage(testChat.getId(), testMessage.getContent(), ""));
+        assertFalse(messageController.createMessage(createMessageRequest(testChat.getId(), testMessage.getContent(), "")));
     }
 
     @Test

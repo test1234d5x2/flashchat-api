@@ -46,6 +46,13 @@ public class FollowControllerTest {
         testUser2.setPassword("password2");
     }
 
+    private FollowRequest createFollowRequest(String followerId, String followedId) {
+        FollowRequest request = new FollowRequest();
+        request.followerId = followerId;
+        request.followedId = followedId;
+        return request;
+    }
+
     @Test
     public void testFollowUser() {
         when(userService.userExists(testUser.getUsername())).thenReturn(true);
@@ -54,7 +61,7 @@ public class FollowControllerTest {
         when(userService.findById(testUser2.getUsername())).thenReturn(testUser2);
         when(followService.followExists(testUser, testUser2)).thenReturn(false);
         when(followService.addFollow(any(Follow.class))).thenReturn(true);
-        boolean result = followController.follow(testUser.getUsername(), testUser2.getUsername());
+        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertTrue(result);
     }
 
@@ -65,7 +72,7 @@ public class FollowControllerTest {
         when(userService.findById(testUser.getUsername())).thenReturn(testUser);
         when(userService.findById(testUser2.getUsername())).thenReturn(testUser2);
         when(followService.followExists(testUser, testUser2)).thenReturn(true);
-        boolean result = followController.follow(testUser.getUsername(), testUser2.getUsername());
+        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertFalse(result);
     }
 
@@ -73,7 +80,7 @@ public class FollowControllerTest {
     public void testFollowUserNotExists() {
         when(userService.userExists(testUser.getUsername())).thenReturn(false);
         when(userService.userExists(testUser2.getUsername())).thenReturn(true);
-        boolean result = followController.follow(testUser.getUsername(), testUser2.getUsername());
+        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertFalse(result);
     }
 
@@ -81,19 +88,19 @@ public class FollowControllerTest {
     public void testFollowUserNotExists2() {
         when(userService.userExists(testUser.getUsername())).thenReturn(true);
         when(userService.userExists(testUser2.getUsername())).thenReturn(false);
-        boolean result = followController.follow(testUser.getUsername(), testUser2.getUsername());
+        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertFalse(result);
     }
 
     @Test
     public void testFollowUserEmpty() {
-        boolean result = followController.follow("", "");
+        boolean result = followController.follow(createFollowRequest("", ""));
         assertFalse(result);
     }
 
     @Test
     public void testFollowUserEmpty2() {
-        boolean result = followController.follow(testUser.getUsername(), "");
+        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), ""));
         assertFalse(result);
     }
 

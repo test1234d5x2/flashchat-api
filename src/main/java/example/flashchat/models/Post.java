@@ -69,4 +69,8 @@ public class Post {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public List<Like> getLikes() {
+        return likes;
+    }
 }

@@ -26,7 +26,10 @@ public class LikeController {
     private PostService postService;
 
     @PostMapping
-    public boolean addLike(@RequestParam String postId, @RequestParam String userId) {
+        public boolean addLike(@RequestBody LikeRequest request) {
+        String postId = request.postId;
+        String userId = request.userId;
+
         if (postId.isEmpty() || userId.isEmpty()) {
             // Empty check.
             return false;
@@ -59,7 +62,10 @@ public class LikeController {
 
 
     @DeleteMapping
-    public boolean deleteLike(@RequestParam String postId, @RequestParam String userId) {
+    public boolean deleteLike(@RequestBody LikeRequest request) {
+        String postId = request.postId;
+        String userId = request.userId;
+
         if (postId.isEmpty() || userId.isEmpty()) {
             // Empty check.
             return false;
@@ -96,4 +102,37 @@ public class LikeController {
 
         return userService.findById(userId).getLikedPosts();
     }
+
+
+    @PostMapping("/check-like")
+    public boolean checkLike(@RequestBody LikeRequest request) {
+        String postId = request.postId;
+        String userId = request.userId;
+
+        if (postId.isEmpty() || userId.isEmpty()) {
+            // Empty check.
+            return false;
+        }
+
+        if (!postService.postExists(postId) || !userService.userExists(userId)) {
+            // Post and user existence check.
+            return false;
+        }
+
+        Post p = postService.retrievePostById(postId);
+        User u = userService.findById(userId);
+
+        if (likeService.likeExists(p, u)) {
+            // Check if like exists.
+            return true;
+        }
+
+        return false;
+    } // TODO: Needs testing.
+}
+
+
+class LikeRequest {
+    public String postId;
+    public String userId;
 }

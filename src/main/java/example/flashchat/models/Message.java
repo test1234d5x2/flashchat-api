@@ -40,6 +40,10 @@ public class Message {
         this.timestamp = LocalDateTime.now();
     }
 
+    public String getId() {
+        return id;
+    }
+
     public void setContent(String content) {
         this.content = content;
     }
