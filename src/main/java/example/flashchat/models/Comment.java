@@ -45,13 +45,14 @@ public class Comment {
     @Nullable
     private Comment parent;
 
+    @OneToMany(mappedBy = "parent")
+    private List<Comment> replies;
+
     public Comment() {
         this.id = UUID.randomUUID().toString();
         this.datePosted = LocalDateTime.now();
     }
 
-    @OneToMany(mappedBy = "parentComment")
-    private List<Comment> replies;
 
     public String getId() {
         return id;
@@ -73,6 +74,7 @@ public class Comment {
         this.datePosted = datePosted;
     }
 
+    @JsonIgnore
     public Post getPost() {
         return post;
     }
@@ -81,18 +83,20 @@ public class Comment {
         this.post = post;
     }
 
-    public User getUser() {
-        return user;
-    }
-
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @JsonIgnore
+    public User getUser() {
+        return user;
     }
 
     public void setParent(Comment parent) {
         this.parent = parent;
     }
 
+    @JsonIgnore
     public Comment getParent() {
         return parent;
     }
