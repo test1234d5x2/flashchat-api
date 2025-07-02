@@ -22,6 +22,9 @@ public class Post {
     @NotNull
     private Date datePosted;
 
+    @NotNull
+    private int views = 0;
+
     @ManyToOne
     @JoinColumn(name = "userId")
     @NotNull
@@ -72,5 +75,13 @@ public class Post {
 
     public List<Like> getLikes() {
         return likes;
+    }
+
+    public void incrementViews() {
+        this.views++;
+    }
+
+    public int getViews() {
+        return views;
     }
 }

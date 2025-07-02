@@ -51,7 +51,9 @@ public class PostController {
             return null;
         }
 
-        return postService.retrievePostById(postId);
+        Post p = postService.retrievePostById(postId);
+        postService.incrementViews(p);
+        return p;
     }
 
     @GetMapping("/user/{userId}")
@@ -64,7 +66,9 @@ public class PostController {
             return new ArrayList<>();
         }
 
-        return postService.getPosts(userId);
+        List<Post> posts = postService.getPosts(userId);
+        incrementViews(posts);
+        return posts;
     }
 
     @GetMapping("/feed/{userId}")
@@ -77,8 +81,10 @@ public class PostController {
             return new ArrayList<>();
         }
 
-        return postService.allPosts();
-    } // TODO: Implement recommendation servicelogic.
+        List<Post> posts = postService.allPosts();
+        incrementViews(posts);
+        return posts;
+    } // TODO: Implement recommendation service logic.
 
     @DeleteMapping
     public boolean deletePost(@RequestParam String postId, @RequestParam String userId) {
@@ -97,6 +103,13 @@ public class PostController {
         }
 
         return postService.deletePost(postId);
+    }
+
+
+    private void incrementViews(List<Post> posts) {
+        for (Post p : posts) {
+            postService.incrementViews(p);
+        }
     }
 }
 

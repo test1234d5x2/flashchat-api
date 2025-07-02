@@ -38,4 +38,9 @@ public class PostService {
     public List<Post> allPosts() {
         return postRepo.findAll();
     }
+
+    public void incrementViews(Post post) {
+        post.incrementViews();
+        postRepo.save(post);
+    }
 }
