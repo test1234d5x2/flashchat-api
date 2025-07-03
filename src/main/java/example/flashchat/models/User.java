@@ -26,10 +26,10 @@ public class User extends LoginDetails {
     private List<Like> likedPosts = new ArrayList<>();
 
     @OneToMany(mappedBy = "follower", orphanRemoval = true)
-    private List<Follow> followers = new ArrayList<>();
+    private List<Follow> following = new ArrayList<>();
 
     @OneToMany(mappedBy = "followed", orphanRemoval = true)
-    private List<Follow> followedBy = new ArrayList<>();
+    private List<Follow> followers = new ArrayList<>();
 
     @OneToMany(mappedBy = "reporter",orphanRemoval = true)
     private List<Report> reports = new ArrayList<>();
@@ -57,6 +57,10 @@ public class User extends LoginDetails {
         return id;
     }
 
+    public int getPostsCount() {
+        return posts.size();
+    }
+
     @JsonIgnore
     public List<Like> getLikedPosts() {
         return likedPosts;
@@ -67,9 +71,17 @@ public class User extends LoginDetails {
         return followers;
     }
 
+    public int getFollowersCount() {
+        return followers.size();
+    }
+
     @JsonIgnore
-    public List<Follow> getFollowedBy() {
-        return followedBy;
+    public List<Follow> getFollowing() {
+        return following;
+    }
+
+    public int getFollowingCount() {
+        return following.size();
     }
 
     @JsonIgnore

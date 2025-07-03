@@ -34,7 +34,6 @@ public class Comment {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -87,7 +86,6 @@ public class Comment {
         this.user = user;
     }
 
-    @JsonIgnore
     public User getUser() {
         return user;
     }

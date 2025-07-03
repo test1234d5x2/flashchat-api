@@ -55,8 +55,16 @@ public class UserService {
         return userRepo.findById(id).isPresent();
     }
 
+    public boolean userExistsByUsername(String username) {
+        return userRepo.findByUsername(username).isPresent();
+    }
+
     public User findById(String id) {
         return userRepo.findById(id).orElse(null);
+    }
+
+    public User findByUsername(String username) {
+        return userRepo.findByUsername(username).orElse(null);
     }
 
     public List<User> searchUsers(String searchQuery) {

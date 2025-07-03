@@ -42,6 +42,20 @@ public class UserController {
         return userService.deleteUser(userId);
     }
 
+
+    @GetMapping("/details/{userId}")
+    public User getUserDetails(@PathVariable String userId) {
+        if (userId.isEmpty()) {
+            return null;
+        }
+
+        if (!userService.userExists(userId)) {
+            return null;
+        }
+
+        return userService.findById(userId);
+    } // TODO: Needs testing.
+
     @GetMapping("/search/{searchQuery}")
     public List<User> searchUsersGet(@PathVariable String searchQuery) {
         if (searchQuery.isEmpty()) {

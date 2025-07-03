@@ -39,6 +39,9 @@ public class Post {
     @OneToMany (mappedBy = "reportedPost", orphanRemoval = true)
     private List<Report> reports = new ArrayList<>();
 
+    @OneToMany (mappedBy = "post", orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
 
     public Post() {
         this.id = UUID.randomUUID().toString();
@@ -75,6 +78,10 @@ public class Post {
 
     public List<Like> getLikes() {
         return likes;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
     }
 
     public void incrementViews() {

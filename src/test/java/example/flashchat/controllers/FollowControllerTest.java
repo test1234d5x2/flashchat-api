@@ -112,7 +112,7 @@ public class FollowControllerTest {
         when(userService.findById(testUser2.getUsername())).thenReturn(testUser2);
         when(followService.followExists(testUser, testUser2)).thenReturn(true);
         when(followService.removeFollow(testUser, testUser2)).thenReturn(true);
-        boolean result = followController.removeFollow(testUser.getUsername(), testUser2.getUsername());
+        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertTrue(result);
     }
 
@@ -120,7 +120,7 @@ public class FollowControllerTest {
     public void testRemoveFollowNotExists() {
         when(userService.userExists(testUser.getUsername())).thenReturn(true);
         when(userService.userExists(testUser2.getUsername())).thenReturn(false);
-        boolean result = followController.removeFollow(testUser.getUsername(), testUser2.getUsername());
+        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertFalse(result);
     }
 
@@ -128,7 +128,7 @@ public class FollowControllerTest {
     public void testRemoveFollowUserNotExists() {
         when(userService.userExists(testUser.getUsername())).thenReturn(false);
         when(userService.userExists(testUser2.getUsername())).thenReturn(true);
-        boolean result = followController.removeFollow(testUser.getUsername(), testUser2.getUsername());
+        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertFalse(result);
     }
 
@@ -136,19 +136,19 @@ public class FollowControllerTest {
     public void testRemoveFollowUserNotExists2() {
         when(userService.userExists(testUser.getUsername())).thenReturn(true);
         when(userService.userExists(testUser2.getUsername())).thenReturn(false);
-        boolean result = followController.removeFollow(testUser.getUsername(), testUser2.getUsername());
+        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertFalse(result);
     }
 
     @Test
     public void testRemoveFollowEmpty() {
-        boolean result = followController.removeFollow("", "");
+        boolean result = followController.removeFollow(createFollowRequest("", ""));
         assertFalse(result);
     }
 
     @Test
     public void testRemoveFollowEmpty2() {  
-        boolean result = followController.removeFollow(testUser.getUsername(), "");
+        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), ""));
         assertFalse(result);
     }
 
@@ -178,7 +178,7 @@ public class FollowControllerTest {
         when(userService.userExists(testUser.getUsername())).thenReturn(true);
         when(userService.findById(testUser.getUsername())).thenReturn(testUser);
         List<Follow> result = followController.getFollowing(testUser.getUsername());
-        assertEquals(testUser.getFollowedBy(), result);
+        assertEquals(testUser.getFollowing(), result);
     }
 
     @Test

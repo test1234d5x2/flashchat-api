@@ -51,7 +51,10 @@ public class FollowController {
 
 
     @DeleteMapping
-    public boolean removeFollow(@RequestParam String followerId, @RequestParam String followedId) {
+    public boolean removeFollow(@RequestBody FollowRequest request) {
+        String followerId = request.followerId;
+        String followedId = request.followedId;
+
         if (followedId.isEmpty() || followerId.isEmpty()) {
             // Empty check.
             return false;
@@ -101,7 +104,7 @@ public class FollowController {
             return new ArrayList<>();
         }
 
-        return userService.findById(userId).getFollowedBy();
+        return userService.findById(userId).getFollowing();
     }
 
 

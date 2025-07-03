@@ -39,6 +39,10 @@ public class CommentController {
             return false;
         }
 
+        if (parentCommentId == null) {
+            parentCommentId = Optional.empty();
+        }
+        
         if (parentCommentId.isPresent() && !commentService.commentExists(parentCommentId.get())) {
             // If available, check if the parent comment exists.
             return false;
