@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -125,5 +126,53 @@ public class UserServiceTest {
         when(userRepo.findById(testUser.getId())).thenReturn(Optional.empty());
         User result = userService.findById(testUser.getId());
         assertNull(result);
+    }
+
+    @Test
+    public void testSearchUsers_PartialMatch() {
+        User user1 = new User();
+        user1.setUsername("alice");
+        User user2 = new User();
+        user2.setUsername("alicia");
+        User user3 = new User();
+        user3.setUsername("bob");
+
+        String searchQuery = "ali";
+        List<User> expected = List.of(user1, user2);
+        when(userRepo.findByUsernameContaining(searchQuery)).thenReturn(expected);
+
+        List<User> result = userService.searchUsers(searchQuery);
+        assertEquals(2, result.size());
+        assertTrue(result.contains(user1));
+        assertTrue(result.contains(user2));
+        assertFalse(result.contains(user3));
+    }
+
+    @Test
+    public void testSearchUsers_NoMatch() {
+        String searchQuery = "xyz";
+        when(userRepo.findByUsernameContaining(searchQuery)).thenReturn(List.of());
+        List<User> result = userService.searchUsers(searchQuery);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testSearchUsers_MultipleMatches() {
+        User user1 = new User();
+        user1.setUsername("johnny");
+        User user2 = new User();
+        user2.setUsername("john");
+        User user3 = new User();
+        user3.setUsername("jonathan");
+
+        String searchQuery = "john";
+        List<User> expected = List.of(user1, user2);
+        when(userRepo.findByUsernameContaining(searchQuery)).thenReturn(expected);
+
+        List<User> result = userService.searchUsers(searchQuery);
+        assertEquals(2, result.size());
+        assertTrue(result.contains(user1));
+        assertTrue(result.contains(user2));
+        assertFalse(result.contains(user3));
     }
 }

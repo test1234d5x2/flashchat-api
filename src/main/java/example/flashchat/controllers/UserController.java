@@ -6,6 +6,7 @@ import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -24,6 +25,7 @@ public class UserController {
         User u = new User();
         u.setUsername(loginDetails.getUsername());
         u.setPassword(loginDetails.getPassword());
+        u.setHandle(UUID.randomUUID().toString());
 
         if (userService.userExists(u.getUsername())) {
             return false;
@@ -54,7 +56,7 @@ public class UserController {
         }
 
         return userService.findById(userId);
-    } // TODO: Needs testing.
+    }
 
     @GetMapping("/search/{searchQuery}")
     public List<User> searchUsersGet(@PathVariable String searchQuery) {
@@ -63,5 +65,5 @@ public class UserController {
         }
 
         return userService.searchUsers(searchQuery);
-    } // TODO: Needs testing.
+    }
 }

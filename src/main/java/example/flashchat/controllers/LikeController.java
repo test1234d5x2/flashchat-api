@@ -128,7 +128,7 @@ public class LikeController {
         }
 
         return false;
-    } // TODO: Needs testing.
+    }
 }
 
 

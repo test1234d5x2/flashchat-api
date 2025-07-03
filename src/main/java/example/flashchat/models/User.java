@@ -1,9 +1,11 @@
 package example.flashchat.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,10 @@ public class User extends LoginDetails {
 
     @Id
     private String id;
+
+    @NotBlank
+    @Column(unique = true)
+    private String handle;
 
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
@@ -55,6 +61,14 @@ public class User extends LoginDetails {
 
     public String getId() {
         return id;
+    }
+
+    public void setHandle(String handle) {
+        this.handle = handle;
+    }
+
+    public String getHandle() {
+        return handle;
     }
 
     public int getPostsCount() {

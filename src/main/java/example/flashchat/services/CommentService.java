@@ -36,6 +36,3 @@ public class CommentService {
         return commentRepo.findByPostId(postId);
     }
 }
-
-
-// TODO: NEEDS TESTING.

@@ -40,7 +40,7 @@ public class ChatService {
         }
 
         return null;
-    } // TODO: Needs testing.
+    }
 
     public boolean chatExists(String chatId) {
         return chatRepo.existsById(chatId);

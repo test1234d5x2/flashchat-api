@@ -69,5 +69,5 @@ public class UserService {
 
     public List<User> searchUsers(String searchQuery) {
         return userRepo.findByUsernameContaining(searchQuery);
-    } // TODO: Needs testing.
+    }
 }

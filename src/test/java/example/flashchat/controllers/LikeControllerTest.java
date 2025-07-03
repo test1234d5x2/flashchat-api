@@ -167,4 +167,48 @@ public class LikeControllerTest {
     public void testGetLikedPostsEmptyUserId() {
         assertTrue(likeController.getLikedPosts("").isEmpty());
     }
+
+    @Test
+    public void testCheckLike_BothIdsEmpty() {
+        LikeRequest request = createLikeRequest("", "");
+        assertFalse(likeController.checkLike(request));
+    }
+
+    @Test
+    public void testCheckLike_PostOrUserDoesNotExist() {
+        LikeRequest request = createLikeRequest("postId", "userId");
+        when(postService.postExists("postId")).thenReturn(false);
+        when(userService.userExists("userId")).thenReturn(true);
+        assertFalse(likeController.checkLike(request));
+
+        when(postService.postExists("postId")).thenReturn(true);
+        when(userService.userExists("userId")).thenReturn(false);
+        assertFalse(likeController.checkLike(request));
+    }
+
+    @Test
+    public void testCheckLike_LikeExists() {
+        LikeRequest request = createLikeRequest("postId", "userId");
+        when(postService.postExists("postId")).thenReturn(true);
+        when(userService.userExists("userId")).thenReturn(true);
+        Post post = new Post();
+        User user = new User();
+        when(postService.retrievePostById("postId")).thenReturn(post);
+        when(userService.findById("userId")).thenReturn(user);
+        when(likeService.likeExists(post, user)).thenReturn(true);
+        assertTrue(likeController.checkLike(request));
+    }
+
+    @Test
+    public void testCheckLike_LikeDoesNotExist() {
+        LikeRequest request = createLikeRequest("postId", "userId");
+        when(postService.postExists("postId")).thenReturn(true);
+        when(userService.userExists("userId")).thenReturn(true);
+        Post post = new Post();
+        User user = new User();
+        when(postService.retrievePostById("postId")).thenReturn(post);
+        when(userService.findById("userId")).thenReturn(user);
+        when(likeService.likeExists(post, user)).thenReturn(false);
+        assertFalse(likeController.checkLike(request));
+    }
 }

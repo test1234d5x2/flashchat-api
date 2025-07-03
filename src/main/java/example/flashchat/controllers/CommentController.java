@@ -73,5 +73,3 @@ class CommentRequest {
     public String comment;
     public Optional<String> parentCommentId;
 }
-
-// TODO: NEEDS TESTING.
