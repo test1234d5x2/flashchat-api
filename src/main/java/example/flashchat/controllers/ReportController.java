@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,7 +29,10 @@ public class ReportController {
     private PostService postService;
 
     @PostMapping
-    public boolean addReport(@RequestParam String reporterId, @RequestParam String postId, @RequestParam String reason) {
+    public boolean addReport(@RequestBody ReportRequest reportRequest) {
+        String reporterId = reportRequest.reporterId;
+        String postId = reportRequest.postId;
+        String reason = reportRequest.reason;
 
         if (reporterId.isEmpty() || postId.isEmpty() || reason.isEmpty()) {
             // Empty check.
@@ -65,4 +69,10 @@ public class ReportController {
 
         return reportService.deleteReport(reportId);
     }
+}
+
+class ReportRequest {
+    public String reporterId;
+    public String postId;
+    public String reason;
 }

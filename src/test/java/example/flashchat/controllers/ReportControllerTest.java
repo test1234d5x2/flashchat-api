@@ -53,6 +53,14 @@ public class ReportControllerTest {
         testReport.setReason("test reason");
     }
 
+    private ReportRequest createReportRequest(String reporterId, String postId, String reason) {
+        ReportRequest reportRequest = new ReportRequest();
+        reportRequest.reporterId = reporterId;
+        reportRequest.postId = postId;
+        reportRequest.reason = reason;
+        return reportRequest;
+    }
+
     @Test
     public void testReportPost() {
         when(userService.userExists(testUser.getId())).thenReturn(true);
@@ -60,14 +68,14 @@ public class ReportControllerTest {
         when(postService.retrievePostById(testPost.getPost())).thenReturn(testPost);
         when(userService.findById(testUser.getId())).thenReturn(testUser);
         when(reportService.addReport(any(Report.class))).thenReturn(true);
-        boolean result = reportController.addReport(testUser.getId(), testPost.getPost(), "test reason");
+        boolean result = reportController.addReport(createReportRequest(testUser.getId(), testPost.getPost(), "test reason"));
         assertTrue(result);
     }
 
     @Test
     public void testReportPostNotExists() {
         when(userService.userExists(testUser.getId())).thenReturn(false);
-        boolean result = reportController.addReport(testUser.getId(), testPost.getPost(), "test reason");
+        boolean result = reportController.addReport(createReportRequest(testUser.getId(), testPost.getPost(), "test reason"));
         assertFalse(result);
     }
 
@@ -75,25 +83,25 @@ public class ReportControllerTest {
     public void testReportUserNotExists() {
         when(userService.userExists(testUser.getId())).thenReturn(true);
         when(postService.postExists(testPost.getPost())).thenReturn(false);
-        boolean result = reportController.addReport(testUser.getId(), testPost.getPost(), "test reason");
+        boolean result = reportController.addReport(createReportRequest(testUser.getId(), testPost.getPost(), "test reason"));
         assertFalse(result);
     }
 
     @Test
     public void testReportEmptyUserId() {
-        boolean result = reportController.addReport("", testPost.getPost(), "test reason");
+        boolean result = reportController.addReport(createReportRequest("", testPost.getPost(), "test reason"));
         assertFalse(result);
     }
 
     @Test
     public void testReportEmptyPostId() {
-        boolean result = reportController.addReport(testUser.getId(), "", "test reason");
+        boolean result = reportController.addReport(createReportRequest(testUser.getId(), "", "test reason"));
         assertFalse(result);
     }
 
     @Test
     public void testReportEmptyReason() {
-        boolean result = reportController.addReport(testUser.getId(), testPost.getPost(), "");
+        boolean result = reportController.addReport(createReportRequest(testUser.getId(), testPost.getPost(), ""));
         assertFalse(result);
     }
 
