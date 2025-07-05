@@ -6,7 +6,6 @@ import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -16,16 +15,19 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public boolean createUser(@RequestBody LoginDetails loginDetails) {
+    public boolean createUser(@RequestBody UserRequest userRequest) {
+        final String username = userRequest.username;
+        final String handle = userRequest.handle;
+        final String password = userRequest.password;
 
-        if (loginDetails.getUsername().isEmpty() || loginDetails.getPassword().isEmpty()) {
+        if (username.isEmpty() || handle.isEmpty() || password.isEmpty()) {
             return false;
         }
 
         User u = new User();
-        u.setUsername(loginDetails.getUsername());
-        u.setPassword(loginDetails.getPassword());
-        u.setHandle(UUID.randomUUID().toString());
+        u.setUsername(username);
+        u.setPassword(password);
+        u.setHandle(handle);
 
         if (userService.userExists(u.getUsername())) {
             return false;
@@ -66,4 +68,10 @@ public class UserController {
 
         return userService.searchUsers(searchQuery);
     }
+}
+
+class UserRequest {
+    public String username;
+    public String handle;
+    public String password;
 }

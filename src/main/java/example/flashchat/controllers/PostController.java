@@ -57,7 +57,7 @@ public class PostController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<Post> getPosts(@PathVariable String userId) {
+    public List<Post> getPostsFromUser(@PathVariable String userId) {
         if (userId.isEmpty()) {
             return new ArrayList<>();
         }

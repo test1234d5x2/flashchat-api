@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import example.flashchat.models.LoginDetails;
 import example.flashchat.models.User;
 import example.flashchat.services.UserService;
 
@@ -35,38 +34,50 @@ public class UserControllerTest {
 
         testUser = new User();
         testUser.setUsername("testuser");
+        testUser.setHandle("testhandle");
         testUser.setPassword("password");
     }
 
 
     @Test
     public void testCreateUser() {
-        LoginDetails loginDetails = new LoginDetails();
-        loginDetails.setUsername(testUser.getUsername());
-        loginDetails.setPassword(testUser.getPassword());
+        UserRequest userRequest = new UserRequest();
+        userRequest.username = testUser.getUsername();
+        userRequest.handle = testUser.getHandle();
+        userRequest.password = testUser.getPassword();
         when(userService.userExists(testUser.getUsername())).thenReturn(false);
 
         // Any user object since id changes for each new user.
         when(userService.createUser(any(User.class))).thenReturn(true);
-        assertTrue(userController.createUser(loginDetails));
+        assertTrue(userController.createUser(userRequest));
     }
 
     @Test
     public void testCreateUserAlreadyExists() {
+        UserRequest userRequest = new UserRequest();
+        userRequest.username = testUser.getUsername();
+        userRequest.handle = testUser.getHandle();
+        userRequest.password = testUser.getPassword();
         when(userService.userExists(testUser.getUsername())).thenReturn(true);
-        assertFalse(userController.createUser(testUser));
+        assertFalse(userController.createUser(userRequest));
     }
 
     @Test
     public void testCreateUserEmptyUsername() {
-        testUser.setUsername("");
-        assertFalse(userController.createUser(testUser));   
+        UserRequest userRequest = new UserRequest();
+        userRequest.username = "";
+        userRequest.handle = testUser.getHandle();
+        userRequest.password = testUser.getPassword();
+        assertFalse(userController.createUser(userRequest));   
     }
 
     @Test
     public void testCreateUserEmptyPassword() {
-        testUser.setPassword("");
-        assertFalse(userController.createUser(testUser));
+        UserRequest userRequest = new UserRequest();
+        userRequest.username = testUser.getUsername();
+        userRequest.handle = testUser.getHandle();
+        userRequest.password = "";
+        assertFalse(userController.createUser(userRequest));
     }
 
     @Test
