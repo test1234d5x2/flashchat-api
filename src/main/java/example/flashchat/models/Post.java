@@ -91,4 +91,12 @@ public class Post {
     public int getViews() {
         return views;
     }
+
+    public List<Media> getMedia() {
+        return media;
+    }
+
+    public void setMedia(List<Media> media) {
+        this.media = media;
+    }
 }

@@ -1,12 +1,17 @@
 package example.flashchat.controllers;
 
+import example.flashchat.Utils;
+import example.flashchat.models.Media;
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
+import example.flashchat.services.MediaService;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,18 +23,23 @@ public class PostController {
     private PostService postService;
 
     @Autowired
+    private MediaService mediaService;
+
+    @Autowired
     private UserService userService;
 
     @PostMapping
-    public boolean createPost(@RequestBody PostRequest request) {
-        String userId = request.userId;
-        String post = request.post;
+    public boolean createPost(@RequestParam String userId, @RequestParam String post,
+            @RequestParam(required = false) MultipartFile[] images) {
+        System.out.println("Creating post for user: " + userId);
+        System.out.println("Post content: " + post);
+        System.out.println("Number of images: " + (images != null ? images.length : 0));
 
         if (userId.isEmpty() || post.isEmpty()) {
             return false;
         }
 
-        if (!userService.userExists(userId) || post.isEmpty()) {
+        if (!userService.userExists(userId)) {
             return false;
         }
 
@@ -38,7 +48,35 @@ public class PostController {
         p.setPost(post);
         p.setUser(u);
 
-        return postService.createPost(p);
+        boolean postCreated = postService.createPost(p);
+
+        // If post was created successfully and images were provided, handle the images
+        if (postCreated && images != null && images.length > 0) {
+            for (MultipartFile image : images) {
+
+                String filePath = Utils.getFilePath(image.getOriginalFilename());
+
+                Media media = new Media();
+                media.setPost(p);
+                media.setFilePath(filePath);
+
+                if (mediaService.addMedia(media)) {
+                    // Save file to disk
+                    try {
+                        image.transferTo(new File(filePath));
+                    } catch (IOException e) {
+                        mediaService.deleteMedia(media.getId());
+                        e.printStackTrace();
+
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        return postCreated;
     }
 
     @GetMapping("/post/{postId}")
@@ -105,16 +143,9 @@ public class PostController {
         return postService.deletePost(postId);
     }
 
-
     private void incrementViews(List<Post> posts) {
         for (Post p : posts) {
             postService.incrementViews(p);
         }
     }
-}
-
-
-class PostRequest {
-    public String userId;
-    public String post;
 }

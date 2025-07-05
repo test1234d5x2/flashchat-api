@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table (name = "media")
 public class Media {
@@ -38,6 +40,7 @@ public class Media {
         this.post = post;
     }
 
+    @JsonIgnore
     public Post getPost() {
         return post;
     }
