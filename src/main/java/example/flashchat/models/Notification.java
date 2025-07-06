@@ -88,6 +88,10 @@ public class Notification {
         return actionUser;
     }
 
+    public String getActionUserId() {
+        return actionUser.getId();
+    }
+
     public void setRecepientUser(User recepientUser) {
         this.recepientUser = recepientUser;
     }

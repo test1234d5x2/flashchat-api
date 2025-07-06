@@ -8,8 +8,10 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -114,7 +116,8 @@ public class User extends LoginDetails {
     }
 
     public List<Notification> getNotifications() {
-        return notifications;
+        // TODO: Sort by recent first.
+        return notifications.stream().sorted(Comparator.comparing(Notification::getCreatedAt).reversed()).collect(Collectors.toList());
     }
 
     @JsonIgnore
