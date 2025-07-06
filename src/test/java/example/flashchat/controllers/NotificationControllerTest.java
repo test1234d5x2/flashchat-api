@@ -152,7 +152,10 @@ public class NotificationControllerTest {
         when(notificationService.markAsRead(notification)).thenReturn(true);
         when(notificationService.findById(notification.getId())).thenReturn(notification);
 
-        boolean result = notificationController.markAsRead(notification.getId());
+        NotificationMarkAsReadRequest request = new NotificationMarkAsReadRequest();
+        request.notificationId = notification.getId();
+
+        boolean result = notificationController.markAsRead(request);
         assertTrue(result);
     }
 
@@ -160,13 +163,19 @@ public class NotificationControllerTest {
     public void testMarkAsReadWithInvalidNotificationId() {
         when(notificationService.notificationExists(notification.getId())).thenReturn(false);
 
-        boolean result = notificationController.markAsRead(notification.getId());
+        NotificationMarkAsReadRequest request = new NotificationMarkAsReadRequest();
+        request.notificationId = notification.getId();
+
+        boolean result = notificationController.markAsRead(request);
         assertFalse(result);
     }
     
     @Test
     public void testMarkAsReadWithEmptyNotificationId() {
-        boolean result = notificationController.markAsRead("");
+        NotificationMarkAsReadRequest request = new NotificationMarkAsReadRequest();
+        request.notificationId = "";
+
+        boolean result = notificationController.markAsRead(request);
         assertFalse(result);
     }
     
