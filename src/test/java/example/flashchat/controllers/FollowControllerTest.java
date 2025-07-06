@@ -19,6 +19,8 @@ import example.flashchat.models.Follow;
 import example.flashchat.models.User;
 import example.flashchat.services.FollowService;
 import example.flashchat.services.UserService;
+import example.flashchat.services.NotificationService;
+import example.flashchat.models.Notification;
 
 public class FollowControllerTest {
     @Mock
@@ -26,6 +28,9 @@ public class FollowControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private FollowController followController;
@@ -61,6 +66,7 @@ public class FollowControllerTest {
         when(userService.findById(testUser2.getUsername())).thenReturn(testUser2);
         when(followService.followExists(testUser, testUser2)).thenReturn(false);
         when(followService.addFollow(any(Follow.class))).thenReturn(true);
+        when(notificationService.createNotification(any(Notification.class))).thenReturn(true);
         boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
         assertTrue(result);
     }

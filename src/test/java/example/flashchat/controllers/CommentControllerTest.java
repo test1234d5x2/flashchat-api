@@ -19,6 +19,8 @@ import example.flashchat.services.UserService;
 import example.flashchat.models.Comment;
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
+import example.flashchat.services.NotificationService;
+import example.flashchat.models.Notification;
 
 public class CommentControllerTest {
     
@@ -33,6 +35,9 @@ public class CommentControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private NotificationService notificationService;
 
     private CommentRequest testCommentRequest;
     private Comment testComment;
@@ -77,6 +82,7 @@ public class CommentControllerTest {
         when(userService.userExists(testUser.getId())).thenReturn(true);
         when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
         when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(notificationService.createNotification(any(Notification.class))).thenReturn(true);
         assertTrue(commentController.createComment(testCommentRequest));
     }
 

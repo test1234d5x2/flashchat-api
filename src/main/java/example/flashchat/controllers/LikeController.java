@@ -3,6 +3,9 @@ package example.flashchat.controllers;
 import example.flashchat.models.Like;
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
+import example.flashchat.models.Notification;
+import example.flashchat.enums.NotificationType;
+import example.flashchat.services.NotificationService;
 import example.flashchat.services.LikeService;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
@@ -24,6 +27,9 @@ public class LikeController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping
         public boolean addLike(@RequestBody LikeRequest request) {
@@ -57,7 +63,18 @@ public class LikeController {
         l.setLikedBy(u);
         l.setPostLiked(p);
 
-        return likeService.addLike(l);
+        boolean success = likeService.addLike(l);
+
+        if (success) {
+            Notification notification = new Notification();
+            notification.setMessage("Liked your post");
+            notification.setType(NotificationType.LIKE);
+            notification.setRecepientUser(p.getUser());
+            notification.setActionUser(u);
+            notificationService.createNotification(notification);
+        }
+
+        return success;
     }
 
 

@@ -21,6 +21,8 @@ import example.flashchat.models.User;
 import example.flashchat.services.ChatService;
 import example.flashchat.services.MessageService;
 import example.flashchat.services.UserService;
+import example.flashchat.services.NotificationService;
+import example.flashchat.models.Notification;
 
 public class MessageControllerTest {
     @Mock
@@ -31,6 +33,9 @@ public class MessageControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private MessageController messageController;
@@ -72,6 +77,7 @@ public class MessageControllerTest {
         when(chatService.getChat(testChat.getId())).thenReturn(testChat);
         when(userService.userExists(testUser.getId())).thenReturn(true);
         when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(notificationService.createNotification(any(Notification.class))).thenReturn(true);
         assertTrue(messageController.createMessage(createMessageRequest(testChat.getId(), testMessage.getContent(), testUser.getId())));
     }
 

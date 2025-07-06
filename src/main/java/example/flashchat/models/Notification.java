@@ -3,6 +3,8 @@ package example.flashchat.models;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import example.flashchat.enums.NotificationType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -81,6 +83,7 @@ public class Notification {
         this.actionUser = actionUser;
     }
 
+    @JsonIgnore
     public User getActionUser() {
         return actionUser;
     }
@@ -89,6 +92,7 @@ public class Notification {
         this.recepientUser = recepientUser;
     }
 
+    @JsonIgnore
     public User getRecepientUser() {
         return recepientUser;
     }

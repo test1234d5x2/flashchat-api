@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.ArrayList;
 import example.flashchat.models.Follow;
+import example.flashchat.services.NotificationService;
+import example.flashchat.models.Notification;
+import example.flashchat.enums.NotificationType;
 
 @RestController
 @RequestMapping("api/v1/follows")
@@ -18,6 +21,9 @@ public class FollowController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping
     public boolean follow(@RequestBody FollowRequest request) {
@@ -46,7 +52,18 @@ public class FollowController {
         f.setFollower(follower);
         f.setFollowed(followed);
 
-        return followService.addFollow(f);
+        boolean success = followService.addFollow(f);
+
+        if (success) {
+            Notification notification = new Notification();
+            notification.setMessage("Followed you");
+            notification.setType(NotificationType.FOLLOW);
+            notification.setRecepientUser(followed);
+            notification.setActionUser(follower);
+            notificationService.createNotification(notification);
+        }
+
+        return success;
     }
 
 

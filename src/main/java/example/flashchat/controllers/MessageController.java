@@ -16,6 +16,9 @@ import example.flashchat.models.User;
 import example.flashchat.services.ChatService;
 import example.flashchat.services.MessageService;
 import example.flashchat.services.UserService;
+import example.flashchat.services.NotificationService;
+import example.flashchat.models.Notification;
+import example.flashchat.enums.NotificationType;
 
 @RestController
 @RequestMapping("/api/v1/messages")
@@ -29,6 +32,9 @@ public class MessageController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping
     public boolean createMessage(@RequestBody MessageRequest request) {
@@ -59,7 +65,18 @@ public class MessageController {
         message.setContent(content);
         message.setSender(user);
 
-        return messageService.createMessage(message);
+        boolean success = messageService.createMessage(message);
+
+        if (success) {
+            Notification notification = new Notification();
+            notification.setMessage("Message sent");
+            notification.setType(NotificationType.MESSAGE);
+            notification.setRecepientUser(chat.getUser1());
+            notification.setActionUser(chat.getUser2());
+            notificationService.createNotification(notification);
+        }
+
+        return success;
     }
 
 

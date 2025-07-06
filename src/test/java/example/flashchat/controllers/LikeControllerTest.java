@@ -6,6 +6,8 @@ import org.mockito.MockitoAnnotations;
 import example.flashchat.models.Like;
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
+import example.flashchat.services.NotificationService;
+import example.flashchat.models.Notification;
 import example.flashchat.services.LikeService;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
@@ -28,6 +30,9 @@ public class LikeControllerTest {
 
     @Mock
     private PostService postService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private LikeController likeController;
@@ -68,6 +73,7 @@ public class LikeControllerTest {
         when(likeService.likeExists(testPost, testUser2)).thenReturn(false);
         when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
         when(likeService.addLike(any(Like.class))).thenReturn(true);
+        when(notificationService.createNotification(any(Notification.class))).thenReturn(true);
         assertTrue(likeController.addLike(createLikeRequest(testPost.getId(), testUser2.getId())));
     }
 

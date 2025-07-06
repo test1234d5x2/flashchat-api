@@ -13,6 +13,9 @@ import example.flashchat.services.UserService;
 import example.flashchat.models.Comment;
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
+import example.flashchat.models.Notification;
+import example.flashchat.enums.NotificationType;
+import example.flashchat.services.NotificationService;
 
 @RestController
 @RequestMapping("/api/v1/comments")
@@ -26,6 +29,9 @@ public class CommentController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping
     public boolean createComment(@RequestBody CommentRequest commentRequest) {
@@ -61,8 +67,19 @@ public class CommentController {
         comment.setUser(user);
         comment.setComment(commentText);
         comment.setParent(parentCommentId.isPresent() ? commentService.getComment(parentCommentId.get()) : null);
+        
+        boolean success = commentService.createComment(comment);
 
-        return commentService.createComment(comment);
+        if (success) {
+            Notification notification = new Notification();
+            notification.setMessage("Commented on your post");
+            notification.setType(NotificationType.COMMENT);
+            notification.setRecepientUser(post.getUser());
+            notification.setActionUser(user);
+            notificationService.createNotification(notification);
+        }
+
+        return success;
     }
 }
 

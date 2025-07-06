@@ -29,8 +29,7 @@ public class PostController {
     private UserService userService;
 
     @PostMapping
-    public boolean createPost(@RequestParam String userId, @RequestParam String post,
-            @RequestParam(required = false) MultipartFile[] images) {
+    public boolean createPost(@RequestParam String userId, @RequestParam String post, @RequestParam(required = false) MultipartFile[] images) {
         System.out.println("Creating post for user: " + userId);
         System.out.println("Post content: " + post);
         System.out.println("Number of images: " + (images != null ? images.length : 0));
