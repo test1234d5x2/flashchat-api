@@ -5,6 +5,7 @@ import example.flashchat.models.Media;
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
 import example.flashchat.services.MediaService;
+import example.flashchat.services.PostRecommendationService;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private PostRecommendationService postRecommendationService;
 
     @Autowired
     private MediaService mediaService;
@@ -108,8 +112,8 @@ public class PostController {
         return posts;
     }
 
-    @GetMapping("/feed/{userId}")
-    public List<Post> getFeed(@PathVariable String userId) {
+    @GetMapping("/feed/{userId}/{page}")
+    public List<Post> getFeed(@PathVariable String userId, @PathVariable int page) {
         if (userId.isEmpty()) {
             return new ArrayList<>();
         }
@@ -118,9 +122,18 @@ public class PostController {
             return new ArrayList<>();
         }
 
-        List<Post> posts = postService.allPosts();
-        incrementViews(posts);
-        return posts;
+        User user = userService.findById(userId);
+        List<Post> posts = postRecommendationService.getRecommendedPosts(user);
+        // Pagination logic: 20 posts per page
+        int pageSize = 20;
+        int fromIndex = (page - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, posts.size());
+        if (fromIndex >= posts.size() || fromIndex < 0) {
+            return new ArrayList<>();
+        }
+        List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
+        incrementViews(pagedPosts);
+        return pagedPosts;
     } // TODO: Implement recommendation service logic.
 
     @DeleteMapping
@@ -143,8 +156,6 @@ public class PostController {
     }
 
     private void incrementViews(List<Post> posts) {
-        for (Post p : posts) {
-            postService.incrementViews(p);
-        }
+        posts.parallelStream().forEach(postService::incrementViews);
     }
 }

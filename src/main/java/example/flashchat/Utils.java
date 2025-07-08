@@ -1,11 +1,9 @@
 package example.flashchat;
 
 import java.io.File;
+import example.flashchat.models.User;
 
 public class Utils {
-    final static String UPLOAD_DIR = "/uploads/";
-
-
     public static String getProjectRoot() {
         return System.getProperty("user.dir");
     }
@@ -21,7 +19,7 @@ public class Utils {
     }
 
     public static String getFilePath(String filename) {
-        String dirPath = Utils.checkDirectoryExists(Utils.getProjectRoot() + UPLOAD_DIR);
+        String dirPath = Utils.checkDirectoryExists(Utils.getProjectRoot() + Constants.UPLOAD_DIR);
         String filePath = dirPath + "/" + filename;
         return filePath;
     }

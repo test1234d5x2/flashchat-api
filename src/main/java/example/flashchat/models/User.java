@@ -51,6 +51,9 @@ public class User extends LoginDetails {
     @OneToMany(mappedBy = "sender", orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
     @OneToMany(mappedBy = "recepientUser", orphanRemoval = true)
     private List<Notification> notifications = new ArrayList<>();
 
@@ -123,5 +126,10 @@ public class User extends LoginDetails {
     @JsonIgnore
     public List<Notification> getNotificationsAsActionUser() {
         return notificationsAsActionUser;
+    }
+
+    @JsonIgnore
+    public List<Comment> getComments() {
+        return comments;
     }
 }

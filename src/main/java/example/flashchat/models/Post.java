@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table (name = "posts")
@@ -20,7 +22,7 @@ public class Post {
     private String post;
 
     @NotNull
-    private Date datePosted;
+    private LocalDateTime datePosted;
 
     @NotNull
     private int views = 0;
@@ -42,10 +44,13 @@ public class Post {
     @OneToMany (mappedBy = "post", orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany (mappedBy = "reportedPost", orphanRemoval = true)
+    private List<Report> postReports = new ArrayList<>();
+
 
     public Post() {
         this.id = UUID.randomUUID().toString();
-        this.datePosted = new Date();
+        this.datePosted = LocalDateTime.now();
     }
 
     public String getId() {
@@ -64,7 +69,7 @@ public class Post {
         this.post = post;
     }
 
-    public Date getDatePosted() {
+    public LocalDateTime getDatePosted() {
         return datePosted;
     }
 
@@ -98,5 +103,10 @@ public class Post {
 
     public void setMedia(List<Media> media) {
         this.media = media;
+    }
+
+    @JsonIgnore
+    public List<Report> getReports() {
+        return reports;
     }
 }
