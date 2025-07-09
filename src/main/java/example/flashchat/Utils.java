@@ -1,7 +1,6 @@
 package example.flashchat;
 
 import java.io.File;
-import example.flashchat.models.User;
 
 public class Utils {
     public static String getProjectRoot() {

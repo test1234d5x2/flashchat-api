@@ -97,8 +97,8 @@ public class PostController {
         return p;
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Post> getPostsFromUser(@PathVariable String userId) {
+    @GetMapping("/user/{userId}/{page}")
+    public List<Post> getPostsFromUser(@PathVariable String userId, @PathVariable int page) {
         if (userId.isEmpty()) {
             return new ArrayList<>();
         }
@@ -108,8 +108,16 @@ public class PostController {
         }
 
         List<Post> posts = postService.getPosts(userId);
-        incrementViews(posts);
-        return posts;
+
+        int pageSize = 20;
+        int fromIndex = (page - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, posts.size());
+        if (fromIndex >= posts.size() || fromIndex < 0) {
+            return new ArrayList<>();
+        }
+        List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
+        incrementViews(pagedPosts);
+        return pagedPosts;
     }
 
     @GetMapping("/feed/{userId}/{page}")
@@ -134,7 +142,40 @@ public class PostController {
         List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
         incrementViews(pagedPosts);
         return pagedPosts;
-    } // TODO: Implement recommendation service logic.
+    } // TODO: Testing Required.
+
+    @GetMapping("/following/{userId}/{page}")
+    public List<Post> getFollowingPosts(@PathVariable String userId, @PathVariable int page) {
+        if (userId.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        if (!userService.userExists(userId)) {
+            return new ArrayList<>();
+        }
+
+        User user = userService.findById(userId);
+        List<Post> posts = new ArrayList<>();
+
+        user.getFollowing().forEach(follow -> {
+            List<Post> followingPosts = postService.getPosts(follow.getFollowed().getId());
+            posts.addAll(followingPosts);
+        });
+
+        // Sort posts by creation date (newest first)
+        posts.sort((p1, p2) -> p2.getDatePosted().compareTo(p1.getDatePosted()));
+
+        // Pagination logic: 20 posts per page
+        int pageSize = 20;
+        int fromIndex = (page - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, posts.size());
+        if (fromIndex >= posts.size() || fromIndex < 0) {
+            return new ArrayList<>();
+        }
+        List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
+        incrementViews(pagedPosts);
+        return pagedPosts;
+    } // TODO: Testing Required.
 
     @DeleteMapping
     public boolean deletePost(@RequestParam String postId, @RequestParam String userId) {
