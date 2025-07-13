@@ -70,7 +70,7 @@ public class UserServiceTest {
 
         when(userRepo.findByUsername(testUser.getUsername())).thenReturn(Optional.of(testUser));
 
-        boolean result = userService.login(loginDetails);
+        boolean result = userService.login(loginDetails.getUsername(), loginDetails.getPassword());
         assertTrue(result);
     }
 
@@ -82,7 +82,7 @@ public class UserServiceTest {
         testUser2.setPassword("password2");
 
         when(userRepo.findByUsername(testUser.getUsername())).thenReturn(Optional.empty());
-        boolean result = userService.login(testUser2);
+        boolean result = userService.login(testUser2.getUsername(), testUser2.getPassword());
         assertFalse(result);
     }
 

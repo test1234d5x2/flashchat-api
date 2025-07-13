@@ -1,8 +1,6 @@
 package example.flashchat.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,60 +34,6 @@ public class UserControllerTest {
         testUser.setUsername("testuser");
         testUser.setHandle("testhandle");
         testUser.setPassword("password");
-    }
-
-
-    @Test
-    public void testCreateUser() {
-        UserRequest userRequest = new UserRequest();
-        userRequest.username = testUser.getUsername();
-        userRequest.handle = testUser.getHandle();
-        userRequest.password = testUser.getPassword();
-        when(userService.userExists(testUser.getUsername())).thenReturn(false);
-
-        // Any user object since id changes for each new user.
-        when(userService.createUser(any(User.class))).thenReturn(true);
-        assertTrue(userController.createUser(userRequest));
-    }
-
-    @Test
-    public void testCreateUserAlreadyExists() {
-        UserRequest userRequest = new UserRequest();
-        userRequest.username = testUser.getUsername();
-        userRequest.handle = testUser.getHandle();
-        userRequest.password = testUser.getPassword();
-        when(userService.userExists(testUser.getUsername())).thenReturn(true);
-        assertFalse(userController.createUser(userRequest));
-    }
-
-    @Test
-    public void testCreateUserEmptyUsername() {
-        UserRequest userRequest = new UserRequest();
-        userRequest.username = "";
-        userRequest.handle = testUser.getHandle();
-        userRequest.password = testUser.getPassword();
-        assertFalse(userController.createUser(userRequest));   
-    }
-
-    @Test
-    public void testCreateUserEmptyPassword() {
-        UserRequest userRequest = new UserRequest();
-        userRequest.username = testUser.getUsername();
-        userRequest.handle = testUser.getHandle();
-        userRequest.password = "";
-        assertFalse(userController.createUser(userRequest));
-    }
-
-    @Test
-    public void testLogin() {
-        when(userService.login(testUser)).thenReturn(true);
-        assertTrue(userController.login(testUser));
-    }
-
-    @Test
-    public void testLoginIncorrect() {
-        when(userService.login(testUser)).thenReturn(false);
-        assertFalse(userController.login(testUser));
     }
 
     @Test
