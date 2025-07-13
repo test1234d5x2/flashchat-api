@@ -72,13 +72,13 @@ public class PostControllerTest {
     @Test
     public void testGetPosts() {
         when(postService.getPosts(testUser.getId())).thenReturn(new ArrayList<>());
-        assertTrue(postController.getPostsFromUser(testUser.getId()).isEmpty());
+        assertTrue(postController.getPostsFromUser(testUser.getId(), 0).isEmpty());
     }
 
     @Test
     public void testGetPostsInvalidUserId() {
         when(userService.userExists(testUser.getId())).thenReturn(false);
-        assertTrue(postController.getPostsFromUser(testUser.getId()).isEmpty());
+        assertTrue(postController.getPostsFromUser(testUser.getId(), 0).isEmpty());
     }
 
     @Test

@@ -1,6 +1,5 @@
 package example.flashchat.controllers;
 
-import example.flashchat.models.LoginDetails;
 import example.flashchat.models.User;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,33 +12,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @PostMapping
-    public boolean createUser(@RequestBody UserRequest userRequest) {
-        final String username = userRequest.username;
-        final String handle = userRequest.handle;
-        final String password = userRequest.password;
-
-        if (username.isEmpty() || handle.isEmpty() || password.isEmpty()) {
-            return false;
-        }
-
-        User u = new User();
-        u.setUsername(username);
-        u.setPassword(password);
-        u.setHandle(handle);
-
-        if (userService.userExists(u.getUsername())) {
-            return false;
-        }
-
-        return userService.createUser(u);
-    }
-
-    @PostMapping("/login")
-    public boolean login(@RequestBody LoginDetails loginDetails) {
-        return userService.login(loginDetails);
-    }
 
     @DeleteMapping
     public boolean deleteUser(@RequestParam String userId) {
@@ -68,10 +40,4 @@ public class UserController {
 
         return userService.searchUsers(searchQuery);
     }
-}
-
-class UserRequest {
-    public String username;
-    public String handle;
-    public String password;
 }

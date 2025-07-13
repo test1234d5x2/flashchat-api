@@ -1,6 +1,5 @@
 package example.flashchat.services;
 
-import example.flashchat.models.LoginDetails;
 import example.flashchat.models.User;
 import example.flashchat.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +14,9 @@ public class UserService {
 
     @Autowired
     private UserRepo userRepo;
-    private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepo userRepo, PasswordEncoder passwordEncoder) {
-        this.userRepo = userRepo;
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public boolean createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -28,14 +24,14 @@ public class UserService {
         return true;
     }
 
-    public boolean login(LoginDetails loginDetails) {
-        Optional<User> u = userRepo.findByUsername(loginDetails.getUsername());
+    public boolean login(String username, String password) {
+        Optional<User> u = userRepo.findByUsername(username);
 
         if (u.isEmpty()) {
             return false;
         }
 
-        if (!passwordEncoder.matches(loginDetails.getPassword(), u.get().getPassword())) {
+        if (!passwordEncoder.matches(password, u.get().getPassword())) {
             return false;
         }
 
