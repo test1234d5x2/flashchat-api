@@ -118,24 +118,6 @@ public class ChatController {
         return chatService.getChat(chatId);
     }
 
-    // @PostMapping("/getChat")
-    // public Chat getChat(@RequestParam String user1Id, @RequestParam String user2Id) {
-    //     if (user1Id.isEmpty() || user2Id.isEmpty()) {
-    //         // Check if the user ids are empty
-    //         return null;
-    //     }
-
-    //     if (!userService.userExists(user1Id) || !userService.userExists(user2Id)) {
-    //         // Check if the users are not found
-    //         return null;
-    //     }
-
-    //     User user1 = userService.findById(user1Id);
-    //     User user2 = userService.findById(user2Id);
-
-    //     return chatService.getChat(user1, user2);
-    // }
-
     @PostMapping("/getChat")
     public Chat getChat(Authentication authentication, @RequestBody ChatRequest request) {
         if (authentication == null) {
@@ -166,11 +148,10 @@ public class ChatController {
 
         if (!chatService.chatExists(user1, user2)) {
             // If the chat does not exist, create it
-            ChatRequest r = new ChatRequest();
-            r.otherParticipantId = otherParticipantId;
-            if (!createChat(authentication, r)) {
-                return null;
-            }
+            Chat chat = new Chat();
+            chat.setUser1(user1);
+            chat.setUser2(user2);
+            chatService.createChat(chat);
         }
 
         return chatService.getChat(user1, user2);
