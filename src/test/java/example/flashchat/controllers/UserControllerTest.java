@@ -44,12 +44,12 @@ public class UserControllerTest {
 
     @Test
     public void testGetUserDetails_ValidId() {
-        String userId = "123";
+        String username = "123";
         User user = new User();
         user.setUsername("alice");
-        when(userService.userExists(userId)).thenReturn(true);
-        when(userService.findById(userId)).thenReturn(user);
-        User result = userController.getUserDetails(userId);
+        when(userService.userExists(username)).thenReturn(true);
+        when(userService.findByUsername(username)).thenReturn(user);
+        User result = userController.getUserDetails(username);
         assertTrue(result == user);
     }
 
@@ -61,9 +61,9 @@ public class UserControllerTest {
 
     @Test
     public void testGetUserDetails_NotFound() {
-        String userId = "notfound";
-        when(userService.userExists(userId)).thenReturn(false);
-        User result = userController.getUserDetails(userId);
+        String username = "notfound";
+        when(userService.userExists(username)).thenReturn(false);
+        User result = userController.getUserDetails(username);
         assertTrue(result == null);
     }
 

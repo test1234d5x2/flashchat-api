@@ -9,6 +9,7 @@ import example.flashchat.services.PostRecommendationService;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,20 +34,26 @@ public class PostController {
     private UserService userService;
 
     @PostMapping
-    public boolean createPost(@RequestParam String userId, @RequestParam String post, @RequestParam(required = false) MultipartFile[] images) {
-        System.out.println("Creating post for user: " + userId);
+    public boolean createPost(Authentication authentication, @RequestParam String post, @RequestParam(required = false) MultipartFile[] images) {
         System.out.println("Post content: " + post);
         System.out.println("Number of images: " + (images != null ? images.length : 0));
 
-        if (userId.isEmpty() || post.isEmpty()) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
             return false;
         }
 
-        if (!userService.userExists(userId)) {
+        String username = authentication.getName().toString();
+
+        if (post.isEmpty()) {
             return false;
         }
 
-        User u = userService.findById(userId);
+        if (!userService.userExistsByUsername(username)) {
+            return false;
+        }
+
+        User u = userService.findByUsername(username);
         Post p = new Post();
         p.setPost(post);
         p.setUser(u);
@@ -98,7 +105,7 @@ public class PostController {
     }
 
     @GetMapping("/user/{userId}/{page}")
-    public List<Post> getPostsFromUser(@PathVariable String userId, @PathVariable int page) {
+    public List<Post> getPostsByUser(@PathVariable String userId, @PathVariable int page) {
         if (userId.isEmpty()) {
             return new ArrayList<>();
         }
@@ -120,17 +127,20 @@ public class PostController {
         return pagedPosts;
     }
 
-    @GetMapping("/feed/{userId}/{page}")
-    public List<Post> getFeed(@PathVariable String userId, @PathVariable int page) {
-        if (userId.isEmpty()) {
+    @GetMapping("/feed/{page}")
+    public List<Post> getFeed(Authentication authentication, @PathVariable int page) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
             return new ArrayList<>();
         }
 
-        if (!userService.userExists(userId)) {
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
             return new ArrayList<>();
         }
 
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
         List<Post> posts = postRecommendationService.getRecommendedPosts(user);
         // Pagination logic: 20 posts per page
         int pageSize = 20;
@@ -144,17 +154,20 @@ public class PostController {
         return pagedPosts;
     } // TODO: Testing Required.
 
-    @GetMapping("/following/{userId}/{page}")
-    public List<Post> getFollowingPosts(@PathVariable String userId, @PathVariable int page) {
-        if (userId.isEmpty()) {
+    @GetMapping("/following/{page}")
+    public List<Post> getFollowingPosts(Authentication authentication, @PathVariable int page) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
             return new ArrayList<>();
         }
 
-        if (!userService.userExists(userId)) {
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
             return new ArrayList<>();
         }
 
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
         List<Post> posts = new ArrayList<>();
 
         user.getFollowing().forEach(follow -> {
@@ -178,18 +191,26 @@ public class PostController {
     } // TODO: Testing Required.
 
     @DeleteMapping
-    public boolean deletePost(@RequestParam String postId, @RequestParam String userId) {
-        if (userId.isEmpty() || postId.isEmpty()) {
+    public boolean deletePost(Authentication authentication, @RequestParam String postId) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
             return false;
         }
 
-        if (!userService.userExists(userId) || !postService.postExists(postId)) {
+        String username = authentication.getName().toString();
+
+        if (postId.isEmpty()) {
+            return false;
+        }
+
+        if (!userService.userExistsByUsername(username) || !postService.postExists(postId)) {
             return false;
         }
 
         Post p = postService.retrievePostById(postId);
+        User user = userService.findByUsername(username);
 
-        if (!(p.getUser().getId().equals(userId))) {
+        if (!(p.getUser().equals(user))) {
             return false;
         }
 

@@ -5,6 +5,7 @@ import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -20,7 +21,12 @@ public class UserController {
 
 
     @GetMapping("/details/{userId}")
-    public User getUserDetails(@PathVariable String userId) {
+    public User getUserDetails(Authentication authentication, @PathVariable String userId) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return null;
+        }
+
         if (userId.isEmpty()) {
             return null;
         }
@@ -30,7 +36,24 @@ public class UserController {
         }
 
         return userService.findById(userId);
-    }
+    } // TODO: Needs testing.
+
+
+    @GetMapping("/details/me")
+    public User getMyDetails(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return null;
+        }
+
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
+            return null;
+        }
+
+        return userService.findByUsername(username);
+    } // TODO: Needs testing.
 
     @GetMapping("/search/{searchQuery}")
     public List<User> searchUsersGet(@PathVariable String searchQuery) {

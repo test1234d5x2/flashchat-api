@@ -4,6 +4,7 @@ import example.flashchat.models.User;
 import example.flashchat.services.FollowService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,21 +27,26 @@ public class FollowController {
     private NotificationService notificationService;
 
     @PostMapping
-    public boolean follow(@RequestBody FollowRequest request) {
-        String followerId = request.followerId;
+    public boolean follow(Authentication authentication, @RequestBody FollowRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString(); // follower
         String followedId = request.followedId;
 
-        if (followedId.isEmpty() || followerId.isEmpty()) {
+        if (followedId.isEmpty()) {
             // Empty check.
             return false;
         }
 
-        if (!userService.userExists(followerId) || !userService.userExists(followedId)) {
+        if (!userService.userExistsByUsername(username) || !userService.userExists(followedId)) {
             // Check users exist.
             return false;
         }
 
-        User follower = userService.findById(followerId);
+        User follower = userService.findByUsername(username);
         User followed = userService.findById(followedId);
 
         if (followService.followExists(follower, followed)) {
@@ -68,21 +74,26 @@ public class FollowController {
 
 
     @DeleteMapping
-    public boolean removeFollow(@RequestBody FollowRequest request) {
-        String followerId = request.followerId;
+    public boolean removeFollow(Authentication authentication, @RequestBody FollowRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString(); // follower
         String followedId = request.followedId;
 
-        if (followedId.isEmpty() || followerId.isEmpty()) {
+        if (followedId.isEmpty()) {
             // Empty check.
             return false;
         }
 
-        if (!userService.userExists(followerId) || !userService.userExists(followedId)) {
+        if (!userService.userExistsByUsername(username) || !userService.userExists(followedId)) {
             // Check users exist.
             return false;
         }
 
-        User follower = userService.findById(followerId);
+        User follower = userService.findByUsername(username);
         User followed = userService.findById(followedId);
 
         if (!followService.followExists(follower, followed)) {
@@ -95,18 +106,20 @@ public class FollowController {
 
 
     @GetMapping("/followers/{userId}")
-    public List<Follow> getFollowers(@PathVariable String userId) {
-        if (userId.isEmpty()) {
-            // Empty check.
+    public List<Follow> getFollowers(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
             return new ArrayList<>();
         }
 
-        if (!userService.userExists(userId)) {
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
             // User existence check.
             return new ArrayList<>();
         }
 
-        return userService.findById(userId).getFollowers();
+        return userService.findByUsername(username).getFollowers();
     }
 
     @GetMapping("/following/{userId}")
@@ -126,21 +139,26 @@ public class FollowController {
 
 
     @PostMapping("/check-follow")
-    public boolean checkFollow(@RequestBody FollowRequest request) {
-        String followerId = request.followerId;
+    public boolean checkFollow(Authentication authentication, @RequestBody FollowRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString(); // follower
         String followedId = request.followedId;
 
-        if (followerId.isEmpty() || followedId.isEmpty()) {
+        if (followedId.isEmpty()) {
             // Empty check.
             return false;
         }
 
-        if (!userService.userExists(followerId) || !userService.userExists(followedId)) {
+        if (!userService.userExistsByUsername(username) || !userService.userExists(followedId)) {
             // Check users exist.
             return false;
         }
 
-        User follower = userService.findById(followerId);
+        User follower = userService.findByUsername(username);
         User followed = userService.findById(followedId);
 
         if (followService.followExists(follower, followed)) {
@@ -154,6 +172,5 @@ public class FollowController {
 
 
 class FollowRequest {
-    public String followerId;
     public String followedId;
 }

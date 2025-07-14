@@ -10,6 +10,7 @@ import example.flashchat.services.LikeService;
 import example.flashchat.services.PostService;
 import example.flashchat.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -32,22 +33,27 @@ public class LikeController {
     private NotificationService notificationService;
 
     @PostMapping
-        public boolean addLike(@RequestBody LikeRequest request) {
-        String postId = request.postId;
-        String userId = request.userId;
+    public boolean addLike(Authentication authentication, @RequestBody LikeRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
 
-        if (postId.isEmpty() || userId.isEmpty()) {
+        String username = authentication.getName().toString();
+        String postId = request.postId;
+
+        if (postId.isEmpty()) {
             // Empty check.
             return false;
         }
         
-        if (!postService.postExists(postId) || !userService.userExists(userId)) {
+        if (!postService.postExists(postId) || !userService.userExistsByUsername(username)) {
             // Post and user existence check.
             return false;
         }
         
         Post p = postService.retrievePostById(postId);
-        User u = userService.findById(userId);
+        User u = userService.findByUsername(username);
 
         if (p.getUser().getId().equals(u.getId())) {
             // Check whether the user liking the post is the user that created the post.
@@ -79,22 +85,27 @@ public class LikeController {
 
 
     @DeleteMapping
-    public boolean deleteLike(@RequestBody LikeRequest request) {
-        String postId = request.postId;
-        String userId = request.userId;
+    public boolean deleteLike(Authentication authentication, @RequestBody LikeRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
 
-        if (postId.isEmpty() || userId.isEmpty()) {
+        String username = authentication.getName().toString();
+        String postId = request.postId;
+
+        if (postId.isEmpty()) {
             // Empty check.
             return false;
         }
 
-        if (!postService.postExists(postId) || !userService.userExists(userId)) {
+        if (!postService.postExists(postId) || !userService.userExistsByUsername(username)) {
             // Post and user existence check.
             return false;
         }
 
         Post p = postService.retrievePostById(postId);
-        User u = userService.findById(userId);
+        User u = userService.findByUsername(username);
 
         if (!likeService.likeExists(p, u)) {
             // Check if like exists.
@@ -106,38 +117,45 @@ public class LikeController {
 
 
     @GetMapping
-    public List<Like> getLikedPosts(@RequestParam String userId) {
-        if (userId.isEmpty()) {
-            // Empty check.
+    public List<Like> getLikedPosts(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
             return new ArrayList<>();
         }
 
-        if (!userService.userExists(userId)) {
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
             // User existence check.
             return new ArrayList<>();
         }
 
-        return userService.findById(userId).getLikedPosts();
+        return userService.findByUsername(username).getLikedPosts();
     }
 
 
     @PostMapping("/check-like")
-    public boolean checkLike(@RequestBody LikeRequest request) {
-        String postId = request.postId;
-        String userId = request.userId;
+    public boolean checkLike(Authentication authentication, @RequestBody LikeRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
 
-        if (postId.isEmpty() || userId.isEmpty()) {
+        String username = authentication.getName().toString();
+        String postId = request.postId;
+
+        if (postId.isEmpty()) {
             // Empty check.
             return false;
         }
 
-        if (!postService.postExists(postId) || !userService.userExists(userId)) {
+        if (!postService.postExists(postId) || !userService.userExistsByUsername(username)) {
             // Post and user existence check.
             return false;
         }
 
         Post p = postService.retrievePostById(postId);
-        User u = userService.findById(userId);
+        User u = userService.findByUsername(username);
 
         if (likeService.likeExists(p, u)) {
             // Check if like exists.
@@ -151,5 +169,4 @@ public class LikeController {
 
 class LikeRequest {
     public String postId;
-    public String userId;
 }

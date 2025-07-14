@@ -1,6 +1,7 @@
 package example.flashchat.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import example.flashchat.services.ReportService;
 import example.flashchat.models.User;
 import example.flashchat.models.Post;
 import example.flashchat.models.Report;
+
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -29,22 +31,27 @@ public class ReportController {
     private PostService postService;
 
     @PostMapping
-    public boolean addReport(@RequestBody ReportRequest reportRequest) {
-        String reporterId = reportRequest.reporterId;
+    public boolean addReport(Authentication authentication, @RequestBody ReportRequest reportRequest) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString();
         String postId = reportRequest.postId;
         String reason = reportRequest.reason;
 
-        if (reporterId.isEmpty() || postId.isEmpty() || reason.isEmpty()) {
+        if (postId.isEmpty() || reason.isEmpty()) {
             // Empty check.
             return false;
         }
 
-        if (!userService.userExists(reporterId) || !postService.postExists(postId)) {
+        if (!userService.userExistsByUsername(username) || !postService.postExists(postId)) {
             // User and post existence check.
             return false;
         }
 
-        User reporter = userService.findById(reporterId);
+        User reporter = userService.findByUsername(username);
         Post post = postService.retrievePostById(postId);
 
         Report report = new Report();
@@ -72,7 +79,6 @@ public class ReportController {
 }
 
 class ReportRequest {
-    public String reporterId;
     public String postId;
     public String reason;
 }

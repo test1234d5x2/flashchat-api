@@ -3,6 +3,7 @@ package example.flashchat.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,25 +38,30 @@ public class MessageController {
     private NotificationService notificationService;
 
     @PostMapping
-    public boolean createMessage(@RequestBody MessageRequest request) {
+    public boolean createMessage(Authentication authentication, @RequestBody MessageRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString();
         String chatId = request.chatId;
         String content = request.content;
-        String userId = request.userId;
 
-        if (chatId.isEmpty() || content.isEmpty() || userId.isEmpty()) {
+        if (chatId.isEmpty() || content.isEmpty()) {
             // Empty fields check
             return false;
         }
 
-        if (!chatService.chatExists(chatId) || !userService.userExists(userId)) {
+        if (!chatService.chatExists(chatId) || !userService.userExistsByUsername(username)) {
             // Chat or user not found
             return false;
         }
 
         Chat chat = chatService.getChat(chatId);
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
 
-        if (!chat.getUser1().getId().equals(userId) && !chat.getUser2().getId().equals(userId)) {
+        if (!chat.getUser1().equals(user) && !chat.getUser2().equals(user)) {
             // User not part of the chat
             return false;
         }
@@ -81,20 +87,28 @@ public class MessageController {
 
 
     @GetMapping
-    public List<Message> getMessagesByChatId(@RequestParam String chatId, @RequestParam String userId) {
-        if (chatId.isEmpty() || userId.isEmpty()) {
+    public List<Message> getMessagesByChatId(Authentication authentication, @RequestParam String chatId) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return null;
+        }
+
+        String username = authentication.getName().toString();
+
+        if (chatId.isEmpty()) {
             // Empty fields check
             return null;
         }
 
-        if (!chatService.chatExists(chatId) || !userService.userExists(userId)) {
+        if (!chatService.chatExists(chatId) || !userService.userExistsByUsername(username)) {
             // Chat or user not found
             return null;
         }
 
         Chat chat = chatService.getChat(chatId);
+        User user = userService.findByUsername(username);
 
-        if (!chat.getUser1().getId().equals(userId) && !chat.getUser2().getId().equals(userId)) {
+        if (!chat.getUser1().equals(user) && !chat.getUser2().equals(user)) {
             // User not part of the chat
             return null;
         }
@@ -107,5 +121,4 @@ public class MessageController {
 class MessageRequest {
     public String chatId;
     public String content;
-    public String userId;
 }

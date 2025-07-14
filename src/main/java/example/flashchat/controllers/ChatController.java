@@ -1,15 +1,16 @@
 package example.flashchat.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import example.flashchat.models.Chat;
@@ -28,24 +29,33 @@ public class ChatController {
     private UserService userService;
 
     @PostMapping
-    public boolean createChat(@RequestParam String participantId1, @RequestParam String participantId2) {
-        if (participantId1.isEmpty() || participantId2.isEmpty()) {
+    public boolean createChat(Authentication authentication, @RequestBody ChatRequest request) {
+        String otherParticipantUserId = request.otherParticipantId;
+
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString();
+
+        if (otherParticipantUserId.isEmpty()) {
             // Check if the participants are empty
             return false;
         }
 
-        if (participantId1.equals(participantId2)) {
-            // Check if the participants are the same
-            return false;
-        }
-
-        if (!userService.userExists(participantId1) || !userService.userExists(participantId2)) {
+        if (!userService.userExists(otherParticipantUserId) || !userService.userExistsByUsername(username)) {
             // Check if the participants are not found
             return false;
         }
 
-        User participantOne = userService.findById(participantId1);
-        User participantTwo = userService.findById(participantId2);
+        User participantOne = userService.findByUsername(username);
+        User participantTwo = userService.findById(otherParticipantUserId);
+
+        if (participantOne.equals(participantTwo)) {
+            // Check if they are the same user.
+            return false;
+        }
 
         if (chatService.chatExists(participantOne, participantTwo)) {
             // Check if the chat already exists
@@ -58,26 +68,40 @@ public class ChatController {
         return chatService.createChat(chat);
     }
 
-    @GetMapping("/userId/{userId}")
-    public List<Chat> getChats(@PathVariable String userId) {
-        if (userId.isEmpty()) {
-            // Check if the user id is empty
-            return null;
+    @GetMapping("/myChats")
+    public List<Chat> getChats(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return new ArrayList<>();
         }
 
-        if (!userService.userExists(userId)) {
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
             // Check if the user is not found
             return null;
         }
 
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
         List<Chat> chats = user.getChatsAsUser1();
         chats.addAll(user.getChatsAsUser2());
         return chats;
     }
 
     @GetMapping("/chatId/{chatId}")
-    public Chat getChatViaId(@PathVariable String chatId) {
+    public Chat getChatViaId(Authentication authentication, @PathVariable String chatId) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return null;
+        }
+
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
+            // Check if user exists.
+            return null;
+        }
+
         if (chatId.isEmpty()) {
             // Check if the chat id is empty
             return null;
@@ -87,6 +111,8 @@ public class ChatController {
             // Check if the chat is not found
             return null;
         }
+
+        // Check that one of the participants is calling this API endpoint otherwise do not accept.
 
         System.out.println(chatService.getChat(chatId));
         return chatService.getChat(chatId);
@@ -111,31 +137,38 @@ public class ChatController {
     // }
 
     @PostMapping("/getChat")
-    public Chat getChat(@RequestBody ChatRequest request) {
-        String user1Id = request.user1Id;
-        String user2Id = request.user2Id;
+    public Chat getChat(Authentication authentication, @RequestBody ChatRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return null;
+        }
 
-        if (user1Id.isEmpty() || user2Id.isEmpty()) {
+        String username = authentication.getName().toString();
+        String otherParticipantId = request.otherParticipantId;
+
+        if (otherParticipantId.isEmpty()) {
             // Check if the user ids are empty
             return null;
         }
 
-        if (user1Id.equals(user2Id)) {
-            // Check if the users are the same
-            return null;
-        }
-
-        if (!userService.userExists(user1Id) || !userService.userExists(user2Id)) {
+        if (!userService.userExists(otherParticipantId) || !userService.userExistsByUsername(username)) {
             // Check if the users are not found
             return null;
         }
 
-        User user1 = userService.findById(user1Id);
-        User user2 = userService.findById(user2Id);
+        User user1 = userService.findByUsername(username);
+        User user2 = userService.findById(otherParticipantId);
+
+        if (user1.equals(user2)) {
+            // Check if the users are the same.
+            return null;
+        }
 
         if (!chatService.chatExists(user1, user2)) {
             // If the chat does not exist, create it
-            if (!createChat(user1.getId(), user2.getId())) {
+            ChatRequest r = new ChatRequest();
+            r.otherParticipantId = otherParticipantId;
+            if (!createChat(authentication, r)) {
                 return null;
             }
         }
@@ -143,9 +176,17 @@ public class ChatController {
         return chatService.getChat(user1, user2);
     }
 
-    @DeleteMapping("/{chatId}")
-    public boolean deleteChat(@PathVariable String chatId, @RequestParam String userId) {
-        if (userId.isEmpty() || chatId.isEmpty()) {
+    @DeleteMapping("/deleteChat")
+    public boolean deleteChat(Authentication authentication, @RequestBody DeleteChatRequest request) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString();
+        String chatId = request.chatId;
+
+        if (chatId.isEmpty()) {
             // Check if the user id or chat id is empty
             return false;
         }
@@ -155,13 +196,14 @@ public class ChatController {
             return false;
         }
 
-        if (!userService.userExists(userId)) {
+        if (!userService.userExistsByUsername(username)) {
             // Check if the user is not found
             return false;
         }
 
         Chat chat = chatService.getChat(chatId);
-        if (!chat.getUser1().getId().equals(userId) && !chat.getUser2().getId().equals(userId)) {
+        User user = userService.findByUsername(username);
+        if (!chat.getUser1().equals(user) && !chat.getUser2().equals(user)) {
             // Check if the user is not a participant of the chat
             return false;
         }
@@ -172,6 +214,9 @@ public class ChatController {
 
 
 class ChatRequest {
-    public String user1Id;
-    public String user2Id;
+    public String otherParticipantId;
+}
+
+class DeleteChatRequest {
+    public String chatId;
 }

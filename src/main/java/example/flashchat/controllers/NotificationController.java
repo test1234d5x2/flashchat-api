@@ -1,8 +1,10 @@
 package example.flashchat.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,16 +29,23 @@ public class NotificationController {
     private UserService userService;
 
     @PostMapping
-    public boolean createNotification(@RequestParam String userId, @RequestParam String actionUserId, @RequestParam String message, @RequestParam NotificationType type) {
-        if (userId.isEmpty() || actionUserId.isEmpty() || message.isEmpty() || type == null) {
+    public boolean createNotification(Authentication authentication, @RequestParam String actionUserId, @RequestParam String message, @RequestParam NotificationType type) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
             return false;
         }
 
-        if (!userService.userExists(actionUserId) || !userService.userExists(userId)) {
+        String username = authentication.getName().toString(); // recipientUser
+
+        if (actionUserId.isEmpty() || message.isEmpty() || type == null) {
             return false;
         }
 
-        User receipientUser = userService.findById(userId);
+        if (!userService.userExists(actionUserId) || !userService.userExistsByUsername(username)) {
+            return false;
+        }
+
+        User receipientUser = userService.findByUsername(username);
         User actionUser = userService.findById(actionUserId);
 
         Notification notification = new Notification();
@@ -49,16 +58,19 @@ public class NotificationController {
     }
 
     @GetMapping
-    public List<Notification> getNotifications(@RequestParam String userId) {
-        if (userId.isEmpty()) {
+    public List<Notification> getNotifications(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return new ArrayList<>();
+        }
+
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
             return null;
         }
 
-        if (!userService.userExists(userId)) {
-            return null;
-        }
-
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
         return notificationService.getNotifications(user);
     }
 
@@ -107,16 +119,19 @@ public class NotificationController {
     }
 
     @PostMapping("/delete-all")
-    public boolean deleteAllNotifications(@RequestParam String userId) {
-        if (userId.isEmpty()) {
+    public boolean deleteAllNotifications(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
             return false;
         }
 
-        if (!userService.userExists(userId)) {
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
             return false;
         }
 
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
         return notificationService.deleteAllNotifications(user);
     }
 }

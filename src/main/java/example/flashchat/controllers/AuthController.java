@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,10 +69,24 @@ public class AuthController {
             .domain("localhost")
             .build();
 
-        System.out.println("Attempting to set cookie: " + jwtCookie.toString());
-        System.out.println(ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(true));
-
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(true);
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<Boolean> logout(Authentication authentication) {
+
+
+        ResponseCookie expiredCookie = ResponseCookie.from("accessToken", "")
+            .httpOnly(true)
+            .secure(false)
+            .path("/")
+            .maxAge(0)
+            .sameSite("Lax")
+            .domain("localhost")
+            .build();
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, expiredCookie.toString()).body(true);
     }
 }
 

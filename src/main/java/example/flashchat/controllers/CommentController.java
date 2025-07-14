@@ -3,6 +3,7 @@ package example.flashchat.controllers;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,13 +35,19 @@ public class CommentController {
     private NotificationService notificationService;
 
     @PostMapping
-    public boolean createComment(@RequestBody CommentRequest commentRequest) {
+    public boolean createComment(Authentication authentication, @RequestBody CommentRequest commentRequest) {
         String postId = commentRequest.postId;
         String commentText = commentRequest.comment;
-        String userId = commentRequest.userId;
         Optional<String> parentCommentId = commentRequest.parentCommentId;
 
-        if (postId == null || commentText == null || userId == null) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString();
+
+        if (postId == null || commentText == null) {
             // Empty check for the params that need to be present.
             return false;
         }
@@ -54,13 +61,13 @@ public class CommentController {
             return false;
         }
 
-        if (!postService.postExists(postId) || !userService.userExists(userId)) {
+        if (!postService.postExists(postId) || !userService.userExistsByUsername(username)) {
             // If the post or user does not exist, return false.
             return false;
         }
 
         Post post = postService.retrievePostById(postId);
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
         
         Comment comment = new Comment();
         comment.setPost(post);
@@ -85,7 +92,6 @@ public class CommentController {
 
 
 class CommentRequest {
-    public String userId;
     public String postId;
     public String comment;
     public Optional<String> parentCommentId;
