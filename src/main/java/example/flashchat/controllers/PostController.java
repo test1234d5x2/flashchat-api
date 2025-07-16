@@ -104,6 +104,29 @@ public class PostController {
         return p;
     }
 
+    @GetMapping("/user/{userId}/{page}")
+    public List<Post> getPostsByUser(@PathVariable String userId, @PathVariable int page) {
+        if (userId.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        if (!userService.userExists(userId)) {
+            return new ArrayList<>();
+        }
+
+        List<Post> posts = postService.getPosts(userId);
+
+        int pageSize = 20;
+        int fromIndex = (page - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, posts.size());
+        if (fromIndex >= posts.size() || fromIndex < 0) {
+            return new ArrayList<>();
+        }
+        List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
+        incrementViews(pagedPosts);
+        return pagedPosts;
+    } // TODO: Needs Testing
+
     @GetMapping("/feed/{page}")
     public List<Post> getFeed(Authentication authentication, @PathVariable int page) {
         if (authentication == null) {
@@ -165,7 +188,7 @@ public class PostController {
         List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
         incrementViews(pagedPosts);
         return pagedPosts;
-    }
+    } // TODO: Testing Required.
 
     @DeleteMapping
     public boolean deletePost(Authentication authentication, @RequestParam String postId) {
