@@ -88,16 +88,8 @@ public class UserServiceTest {
 
     @Test
     public void testDeleteUser() {
-        when(userRepo.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        boolean result = userService.deleteUser(testUser.getId());
+        boolean result = userService.deleteUser(testUser);
         assertTrue(result);
-    }
-
-    @Test
-    public void testDeleteUserNotFound() {
-        when(userRepo.findById(testUser.getId())).thenReturn(Optional.empty());
-        boolean result = userService.deleteUser(testUser.getId());
-        assertFalse(result);
     }
 
     @Test

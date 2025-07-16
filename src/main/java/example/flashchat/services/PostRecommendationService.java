@@ -57,7 +57,6 @@ public class PostRecommendationService {
         return totalScore;
     }
 
-    // TODO: Implement follow score calculation.
     private double calculateFollowScore(Post post, User user) {
         // Check the author of the post is followed by the user.
         if (user.getFollowing().stream().anyMatch(follow -> follow.getFollowed().getId().equals(post.getUser().getId()))) {
@@ -173,6 +172,3 @@ public class PostRecommendationService {
         return contentScore;
     }
 }
-
-
-// TODO: Needs Testing

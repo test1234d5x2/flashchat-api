@@ -38,12 +38,8 @@ public class UserService {
         return true;
     }
 
-    public boolean deleteUser(String id) {
-        if (userRepo.findById(id).isEmpty()) {
-            return false;
-        }
-
-        userRepo.deleteById(id);
+    public boolean deleteUser(User u) {
+        userRepo.delete(u);
         return true;
     }
 

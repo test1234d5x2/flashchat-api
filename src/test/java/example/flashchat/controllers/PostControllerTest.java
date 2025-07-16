@@ -9,7 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -127,5 +129,28 @@ public class PostControllerTest {
     public void testDeletePostWithEmptyPostId() {
         Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
         assertFalse(postController.deletePost(authentication, ""));
+    }
+
+
+    @Test
+    public void testGetPost() {
+        when(postService.postExists(testPost.getId())).thenReturn(true);
+        when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
+
+        assertEquals(postController.getPost(testPost.getId()), testPost);
+    }
+
+    
+    @Test
+    public void testGetPostPostDoesNotExist() {
+        when(postService.postExists(testPost.getId())).thenReturn(false);
+        when(postService.retrievePostById(testPost.getId())).thenReturn(null);
+
+        assertNull(postController.getPost(testPost.getId()));
+    }
+
+    @Test
+    public void testGetPostEmptyPostId() {
+        assertNull(postController.getPost(""));
     }
 }

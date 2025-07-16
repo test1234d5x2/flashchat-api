@@ -15,9 +15,22 @@ public class UserController {
     private UserService userService;
 
     @DeleteMapping
-    public boolean deleteUser(@RequestParam String userId) {
-        return userService.deleteUser(userId);
-    } // TODO: Needs proper testing and completion.
+    public boolean deleteUser(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("No authentication present");
+            return false;
+        }
+
+        String username = authentication.getName().toString();
+
+        if (!userService.userExistsByUsername(username)) {
+            return false;
+        }
+
+        User user = userService.findByUsername(username);
+        return userService.deleteUser(user);
+
+    }
 
 
     @GetMapping("/details/{userId}")
@@ -36,7 +49,7 @@ public class UserController {
         }
 
         return userService.findById(userId);
-    } // TODO: Needs testing.
+    }
 
 
     @GetMapping("/details/me")
@@ -53,7 +66,7 @@ public class UserController {
         }
 
         return userService.findByUsername(username);
-    } // TODO: Needs testing.
+    }
 
     @GetMapping("/search/{searchQuery}")
     public List<User> searchUsersGet(@PathVariable String searchQuery) {

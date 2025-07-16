@@ -1,5 +1,8 @@
 package example.flashchat.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -52,8 +55,29 @@ public class UserControllerTest {
 
     @Test
     public void testDeleteUser() {
-        when(userService.deleteUser(testUser.getId())).thenReturn(true);
-        assertTrue(userController.deleteUser(testUser.getId()));
+        when(userService.userExistsByUsername(AUTHENTICATED_USER_USERNAME)).thenReturn(true);
+        when(userService.findByUsername(AUTHENTICATED_USER_USERNAME)).thenReturn(testUser);
+        when(userService.deleteUser(testUser)).thenReturn(true);
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        assertTrue(userController.deleteUser(authentication));
+    }
+
+    @Test
+    public void testDeleteUserDoesNotExist() {
+        when(userService.userExistsByUsername(AUTHENTICATED_USER_USERNAME)).thenReturn(false);
+        when(userService.findByUsername(AUTHENTICATED_USER_USERNAME)).thenReturn(null);
+        when(userService.deleteUser(testUser)).thenReturn(true);
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        assertFalse(userController.deleteUser(authentication));
+    }
+
+    @Test
+    public void testDeleteUserNoAuthentication() {
+        assertFalse(userController.deleteUser(null));
     }
 
     @Test
@@ -104,5 +128,27 @@ public class UserControllerTest {
     public void testSearchUsersGet_EmptyQuery() {
         java.util.List<User> result = userController.searchUsersGet("");
         assertTrue(result.isEmpty());
+    }
+
+
+    @Test
+    public void getMyDetails() {
+        when(userService.findByUsername(AUTHENTICATED_USER_USERNAME)).thenReturn(testUser);
+        when(userService.userExistsByUsername(AUTHENTICATED_USER_USERNAME)).thenReturn(true);
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        assertEquals(userController.getMyDetails(authentication), testUser);
+    }
+
+    @Test
+    public void getMyDetailsUserDoesNotExist() {
+        when(userService.findByUsername(AUTHENTICATED_USER_USERNAME)).thenReturn(null);
+        when(userService.userExistsByUsername(AUTHENTICATED_USER_USERNAME)).thenReturn(false);
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        assertNull(userController.getMyDetails(authentication));
+    }
+
+    @Test
+    public void getMyDetailsNoAuthentication() {
+        assertNull(userController.getMyDetails(null));
     }
 }

@@ -119,7 +119,6 @@ public class User extends LoginDetails {
     }
 
     public List<Notification> getNotifications() {
-        // TODO: Sort by recent first.
         return notifications.stream().sorted(Comparator.comparing(Notification::getCreatedAt).reversed()).collect(Collectors.toList());
     }
 
