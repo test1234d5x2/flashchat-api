@@ -5,11 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import example.flashchat.models.Post;
 import example.flashchat.models.Report;
@@ -35,12 +40,14 @@ public class ReportControllerTest {
     private Post testPost;
     private Report testReport;
 
+    private final String AUTHENTICATED_USER_USERNAME = "testuser";
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
         testUser = new User();
-        testUser.setUsername("testuser");
+        testUser.setUsername(AUTHENTICATED_USER_USERNAME);
         testUser.setPassword("password");
 
         testPost = new Post();
@@ -53,9 +60,16 @@ public class ReportControllerTest {
         testReport.setReason("test reason");
     }
 
-    private ReportRequest createReportRequest(String reporterId, String postId, String reason) {
+    private Authentication createMockAuthentication(String username, boolean authenticated) {
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(username, "password", Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        authentication.setAuthenticated(authenticated);
+        return authentication;
+    }
+
+
+    private ReportRequest createReportRequest(String postId, String reason) {
         ReportRequest reportRequest = new ReportRequest();
-        reportRequest.reporterId = reporterId;
         reportRequest.postId = postId;
         reportRequest.reason = reason;
         return reportRequest;
@@ -63,45 +77,55 @@ public class ReportControllerTest {
 
     @Test
     public void testReportPost() {
-        when(userService.userExists(testUser.getId())).thenReturn(true);
-        when(postService.postExists(testPost.getPost())).thenReturn(true);
-        when(postService.retrievePostById(testPost.getPost())).thenReturn(testPost);
-        when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(postService.postExists(testPost.getId())).thenReturn(true);
+        when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
         when(reportService.addReport(any(Report.class))).thenReturn(true);
-        boolean result = reportController.addReport(createReportRequest(testUser.getId(), testPost.getPost(), "test reason"));
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = reportController.addReport(authentication, createReportRequest(testPost.getId(), "test reason"));
         assertTrue(result);
     }
 
     @Test
     public void testReportPostNotExists() {
-        when(userService.userExists(testUser.getId())).thenReturn(false);
-        boolean result = reportController.addReport(createReportRequest(testUser.getId(), testPost.getPost(), "test reason"));
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(postService.postExists(testPost.getId())).thenReturn(false);
+        when(postService.retrievePostById(testPost.getPost())).thenReturn(testPost);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
+        when(reportService.addReport(any(Report.class))).thenReturn(true);
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = reportController.addReport(authentication, createReportRequest(testPost.getId(), "test reason"));
         assertFalse(result);
     }
 
     @Test
-    public void testReportUserNotExists() {
-        when(userService.userExists(testUser.getId())).thenReturn(true);
-        when(postService.postExists(testPost.getPost())).thenReturn(false);
-        boolean result = reportController.addReport(createReportRequest(testUser.getId(), testPost.getPost(), "test reason"));
-        assertFalse(result);
-    }
+    public void testReportEmptyUserAuthentication() {
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(postService.postExists(testPost.getId())).thenReturn(false);
+        when(postService.retrievePostById(testPost.getPost())).thenReturn(testPost);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
+        when(reportService.addReport(any(Report.class))).thenReturn(true);
 
-    @Test
-    public void testReportEmptyUserId() {
-        boolean result = reportController.addReport(createReportRequest("", testPost.getPost(), "test reason"));
+        boolean result = reportController.addReport(null, createReportRequest(testPost.getPost(), "test reason"));
         assertFalse(result);
     }
 
     @Test
     public void testReportEmptyPostId() {
-        boolean result = reportController.addReport(createReportRequest(testUser.getId(), "", "test reason"));
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        boolean result = reportController.addReport(authentication, createReportRequest("", "test reason"));
         assertFalse(result);
     }
 
     @Test
     public void testReportEmptyReason() {
-        boolean result = reportController.addReport(createReportRequest(testUser.getId(), testPost.getPost(), ""));
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        boolean result = reportController.addReport(authentication, createReportRequest(testPost.getPost(), ""));
         assertFalse(result);
     }
 

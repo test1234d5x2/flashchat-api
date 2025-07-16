@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import example.flashchat.enums.NotificationType;
 import example.flashchat.models.Notification;
@@ -36,12 +41,14 @@ public class NotificationControllerTest {
     private User user2;
     private Notification notification;
 
+    private final String AUTHENTICATED_USER_USERNAME = "user1";
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
         user1 = new User();
-        user1.setUsername("user1");
+        user1.setUsername(AUTHENTICATED_USER_USERNAME);
         user1.setPassword("password");
 
         user2 = new User();
@@ -55,60 +62,79 @@ public class NotificationControllerTest {
         notification.setRecepientUser(user2);
     }
 
+    private Authentication createMockAuthentication(String username, boolean authenticated) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, "password", Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        authentication.setAuthenticated(authenticated);
+        return authentication;
+    }
+
+
     @Test
     public void testCreateNotification() {
         when(userService.userExists(user1.getId())).thenReturn(true);
         when(userService.userExists(user2.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(true);
+        when(userService.userExistsByUsername(user2.getUsername())).thenReturn(true);
         when(userService.findById(user1.getId())).thenReturn(user1);
         when(userService.findById(user2.getId())).thenReturn(user2);
+        when(userService.findByUsername(user1.getUsername())).thenReturn(user1);
+        when(userService.findByUsername(user2.getUsername())).thenReturn(user2);
         when(notificationService.createNotification(any(Notification.class))).thenReturn(true);
 
-        boolean result = notificationController.createNotification(user1.getId(), user2.getId(), "Hello, user1!", NotificationType.MESSAGE);
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = notificationController.createNotification(authentication, user2.getId(), "Hello, user1!", NotificationType.MESSAGE);
         assertTrue(result);
     }
 
     @Test
     public void testCreateNotificationWithInvalidRecepient() {
-        when(userService.userExists(user1.getUsername())).thenReturn(true);
-        when(userService.userExists(user2.getUsername())).thenReturn(false);
+        when(userService.userExists(user1.getId())).thenReturn(true);
+        when(userService.userExists(user2.getId())).thenReturn(false);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(true);
+        when(userService.userExistsByUsername(user2.getUsername())).thenReturn(false);
 
-        boolean result = notificationController.createNotification(user1.getId(), user2.getId(), "Hello, user1!", NotificationType.MESSAGE);
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = notificationController.createNotification(authentication, user2.getId(), "Hello, user1!", NotificationType.MESSAGE);
         assertFalse(result);
     }
 
     @Test
     public void testCreateNotificationWithInvalidActionUser() {
-        when(userService.userExists(user1.getUsername())).thenReturn(false);
-        when(userService.userExists(user2.getUsername())).thenReturn(true);
+        when(userService.userExists(user2.getId())).thenReturn(false);
+        when(userService.userExistsByUsername(user2.getUsername())).thenReturn(false);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(true);
 
-        boolean result = notificationController.createNotification(user1.getId(), user2.getId(), "Hello, user1!", NotificationType.MESSAGE);
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = notificationController.createNotification(authentication, user2.getId(), "Hello, user1!", NotificationType.MESSAGE);
         assertFalse(result);
     }
 
     @Test
     public void testCreateNotificationWithInvalidMessage() {
-        when(userService.userExists(user1.getUsername())).thenReturn(true);
-        when(userService.userExists(user2.getUsername())).thenReturn(true);
+        when(userService.userExists(user1.getId())).thenReturn(true);
+        when(userService.userExists(user2.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(true);
+        when(userService.userExistsByUsername(user2.getUsername())).thenReturn(true);
 
-        boolean result = notificationController.createNotification(user1.getId(), user2.getId(), "", NotificationType.MESSAGE);
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = notificationController.createNotification(authentication, user2.getId(), "", NotificationType.MESSAGE);
         assertFalse(result);
     }
 
     @Test
     public void testCreateNotificationWithInvalidType() {
-        when(userService.userExists(user1.getUsername())).thenReturn(true);
-        when(userService.userExists(user2.getUsername())).thenReturn(true);
+        when(userService.userExists(user1.getId())).thenReturn(true);
+        when(userService.userExists(user2.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(true);
+        when(userService.userExistsByUsername(user2.getUsername())).thenReturn(true);
 
-        boolean result = notificationController.createNotification(user1.getId(), user2.getId(), "Hello, user1!", null);
-        assertFalse(result);
-    }
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
 
-    @Test
-    public void testCreateNotificationWithInvalidUserId() {
-        when(userService.userExists(user1.getUsername())).thenReturn(true);
-        when(userService.userExists(user2.getUsername())).thenReturn(true);
-
-        boolean result = notificationController.createNotification("", user2.getId(), "Hello, user1!", NotificationType.MESSAGE);
+        boolean result = notificationController.createNotification(authentication, user2.getId(), "Hello, user1!", null);
         assertFalse(result);
     }
     
@@ -116,18 +142,26 @@ public class NotificationControllerTest {
     public void testCreateNotificationWithInvalidActionUserId() {
         when(userService.userExists(user1.getUsername())).thenReturn(true);
         when(userService.userExists(user2.getUsername())).thenReturn(true);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(true);
+        when(userService.userExistsByUsername(user2.getUsername())).thenReturn(true);
 
-        boolean result = notificationController.createNotification(user1.getId(), "", "Hello, user1!", NotificationType.MESSAGE);
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = notificationController.createNotification(authentication, "", "Hello, user1!", NotificationType.MESSAGE);
         assertFalse(result);
     }
 
     @Test
     public void testGetNotifications() {
         when(userService.userExists(user1.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(true);
         when(userService.findById(user1.getId())).thenReturn(user1);
+        when(userService.findByUsername(user1.getUsername())).thenReturn(user1);
         when(notificationService.getNotifications(user1)).thenReturn(List.of(notification));
 
-        List<Notification> result = notificationController.getNotifications(user1.getId());
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        List<Notification> result = notificationController.getNotifications(authentication);
         assertEquals(1, result.size());
         assertEquals(notification, result.get(0));
     }
@@ -135,15 +169,18 @@ public class NotificationControllerTest {
     @Test
     public void testGetNotificationsWithInvalidUserId() {
         when(userService.userExists(user1.getId())).thenReturn(false);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(false);
 
-        List<Notification> result = notificationController.getNotifications(user1.getId());
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        List<Notification> result = notificationController.getNotifications(authentication);
         assertNull(result);
     }
 
     @Test
-    public void testGetNotificationsWithEmptyUserId() {
-        List<Notification> result = notificationController.getNotifications("");
-        assertNull(result);
+    public void testGetNotificationsWithEmptyAuthentication() {
+        List<Notification> result = notificationController.getNotifications(null);
+        assertEquals(result, new ArrayList<>());
     }
 
     @Test
@@ -230,24 +267,31 @@ public class NotificationControllerTest {
     @Test
     public void testDeleteAllNotifications() {
         when(userService.userExists(user1.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(true);
         when(userService.findById(user1.getId())).thenReturn(user1);
+        when(userService.findByUsername(user1.getUsername())).thenReturn(user1);
         when(notificationService.deleteAllNotifications(user1)).thenReturn(true);
 
-        boolean result = notificationController.deleteAllNotifications(user1.getId());
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = notificationController.deleteAllNotifications(authentication);
         assertTrue(result);
     }
 
     @Test
     public void testDeleteAllNotificationsWithInvalidUserId() {
         when(userService.userExists(user1.getId())).thenReturn(false);
+        when(userService.userExistsByUsername(user1.getUsername())).thenReturn(false);
 
-        boolean result = notificationController.deleteAllNotifications(user1.getId());
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = notificationController.deleteAllNotifications(authentication);
         assertFalse(result);
     }
 
     @Test
-    public void testDeleteAllNotificationsWithEmptyUserId() {
-        boolean result = notificationController.deleteAllNotifications("");
+    public void testDeleteAllNotificationsWithEmptyAuthentication() {
+        boolean result = notificationController.deleteAllNotifications(null);
         assertFalse(result);
     }
     

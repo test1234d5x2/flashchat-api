@@ -102,7 +102,7 @@ public class PostController {
         Post p = postService.retrievePostById(postId);
         postService.incrementViews(p);
         return p;
-    }
+    } // TODO: Needs Testing.
 
     @GetMapping("/user/{userId}/{page}")
     public List<Post> getPostsByUser(@PathVariable String userId, @PathVariable int page) {
@@ -125,7 +125,7 @@ public class PostController {
         List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
         incrementViews(pagedPosts);
         return pagedPosts;
-    }
+    } // TODO: Needs Testing.
 
     @GetMapping("/feed/{page}")
     public List<Post> getFeed(Authentication authentication, @PathVariable int page) {

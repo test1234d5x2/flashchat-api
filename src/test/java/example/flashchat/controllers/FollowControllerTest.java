@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import example.flashchat.models.Follow;
@@ -38,6 +41,8 @@ public class FollowControllerTest {
     private User testUser;
     private User testUser2;
 
+    private final String AUTHENTICATED_USER_USERNAME = "testuser2";
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -47,27 +52,38 @@ public class FollowControllerTest {
         testUser.setPassword("password");
 
         testUser2 = new User();
-        testUser2.setUsername("testuser2");
+        testUser2.setUsername(AUTHENTICATED_USER_USERNAME);
         testUser2.setPassword("password2");
     }
 
-    private FollowRequest createFollowRequest(String followerId, String followedId) {
+    private FollowRequest createFollowRequest(String followedId) {
         FollowRequest request = new FollowRequest();
-        request.followerId = followerId;
         request.followedId = followedId;
         return request;
     }
 
+    private Authentication createMockAuthentication(String username, boolean authenticated) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, "password", Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        authentication.setAuthenticated(authenticated);
+        return authentication;
+    }
+
+
     @Test
     public void testFollowUser() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(true);
-        when(userService.userExists(testUser2.getUsername())).thenReturn(true);
-        when(userService.findById(testUser.getUsername())).thenReturn(testUser);
-        when(userService.findById(testUser2.getUsername())).thenReturn(testUser2);
+        when(userService.userExists(testUser.getId())).thenReturn(true);
+        when(userService.userExists(testUser2.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(testUser2.getUsername())).thenReturn(true);
+        when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(userService.findById(testUser2.getId())).thenReturn(testUser2);
+        when(userService.findByUsername(testUser2.getUsername())).thenReturn(testUser2);
         when(followService.followExists(testUser, testUser2)).thenReturn(false);
         when(followService.addFollow(any(Follow.class))).thenReturn(true);
         when(notificationService.createNotification(any(Notification.class))).thenReturn(true);
-        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = followController.follow(authentication, createFollowRequest(testUser.getId()));
         assertTrue(result);
     }
 
@@ -75,18 +91,26 @@ public class FollowControllerTest {
     public void testFollowUserAlreadyFollowed() {
         when(userService.userExists(testUser.getUsername())).thenReturn(true);
         when(userService.userExists(testUser2.getUsername())).thenReturn(true);
+        when(userService.userExistsByUsername(testUser2.getUsername())).thenReturn(true);
         when(userService.findById(testUser.getUsername())).thenReturn(testUser);
         when(userService.findById(testUser2.getUsername())).thenReturn(testUser2);
+        when(userService.findByUsername(testUser2.getUsername())).thenReturn(testUser2);
         when(followService.followExists(testUser, testUser2)).thenReturn(true);
-        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = followController.follow(authentication, createFollowRequest(testUser.getId()));
         assertFalse(result);
     }
 
     @Test
     public void testFollowUserNotExists() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(false);
-        when(userService.userExists(testUser2.getUsername())).thenReturn(true);
-        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
+        when(userService.userExists(testUser.getId())).thenReturn(false);
+        when(userService.userExists(testUser2.getId())).thenReturn(true);
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = followController.follow(authentication, createFollowRequest(testUser.getUsername()));
         assertFalse(result);
     }
 
@@ -94,109 +118,64 @@ public class FollowControllerTest {
     public void testFollowUserNotExists2() {
         when(userService.userExists(testUser.getUsername())).thenReturn(true);
         when(userService.userExists(testUser2.getUsername())).thenReturn(false);
-        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = followController.follow(authentication, createFollowRequest(testUser.getUsername()));
         assertFalse(result);
     }
 
     @Test
     public void testFollowUserEmpty() {
-        boolean result = followController.follow(createFollowRequest("", ""));
-        assertFalse(result);
-    }
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
 
-    @Test
-    public void testFollowUserEmpty2() {
-        boolean result = followController.follow(createFollowRequest(testUser.getUsername(), ""));
+        boolean result = followController.follow(authentication, createFollowRequest(""));
         assertFalse(result);
     }
 
     @Test
     public void testRemoveFollow() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(true);
-        when(userService.userExists(testUser2.getUsername())).thenReturn(true);
-        when(userService.findById(testUser.getUsername())).thenReturn(testUser);
-        when(userService.findById(testUser2.getUsername())).thenReturn(testUser2);
-        when(followService.followExists(testUser, testUser2)).thenReturn(true);
-        when(followService.removeFollow(testUser, testUser2)).thenReturn(true);
-        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
-        assertTrue(result);
-    }
+        when(userService.userExists(testUser.getId())).thenReturn(true);
+        when(userService.userExists(testUser2.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(testUser2.getUsername())).thenReturn(true);
+        when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(userService.findById(testUser2.getId())).thenReturn(testUser2);
+        when(userService.findByUsername(testUser2.getUsername())).thenReturn(testUser2);
+        when(followService.followExists(testUser2, testUser)).thenReturn(true);
+        when(followService.removeFollow(testUser2, testUser)).thenReturn(true);
 
-    @Test
-    public void testRemoveFollowNotExists() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(true);
-        when(userService.userExists(testUser2.getUsername())).thenReturn(false);
-        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
-        assertFalse(result);
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = followController.removeFollow(authentication, createFollowRequest(testUser.getId()));
+        assertTrue(result);
     }
 
     @Test
     public void testRemoveFollowUserNotExists() {
         when(userService.userExists(testUser.getUsername())).thenReturn(false);
         when(userService.userExists(testUser2.getUsername())).thenReturn(true);
-        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
-        assertFalse(result);
-    }
 
-    @Test
-    public void testRemoveFollowUserNotExists2() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(true);
-        when(userService.userExists(testUser2.getUsername())).thenReturn(false);
-        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), testUser2.getUsername()));
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        boolean result = followController.removeFollow(authentication, createFollowRequest(testUser.getUsername()));
         assertFalse(result);
     }
 
     @Test
     public void testRemoveFollowEmpty() {
-        boolean result = followController.removeFollow(createFollowRequest("", ""));
-        assertFalse(result);
-    }
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
 
-    @Test
-    public void testRemoveFollowEmpty2() {  
-        boolean result = followController.removeFollow(createFollowRequest(testUser.getUsername(), ""));
+        boolean result = followController.removeFollow(authentication, createFollowRequest(""));
         assertFalse(result);
     }
 
     @Test
     public void testGetFollowers() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(true);
-        when(userService.findById(testUser.getUsername())).thenReturn(testUser);
-        List<Follow> result = followController.getFollowers(testUser.getUsername());
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
+        
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        List<Follow> result = followController.getFollowers(authentication);
         assertEquals(testUser.getFollowers(), result);
-    }
-
-    @Test
-    public void testGetFollowersNotExists() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(false);
-        List<Follow> result = followController.getFollowers(testUser.getUsername());
-        assertEquals(new ArrayList<>(), result);
-    }
-
-    @Test
-    public void testGetFollowersEmptyUserId() {
-        List<Follow> result = followController.getFollowers("");
-        assertEquals(new ArrayList<>(), result);
-    }
-
-    @Test
-    public void testGetFollowing() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(true);
-        when(userService.findById(testUser.getUsername())).thenReturn(testUser);
-        List<Follow> result = followController.getFollowing(testUser.getUsername());
-        assertEquals(testUser.getFollowing(), result);
-    }
-
-    @Test
-    public void testGetFollowingNotExists() {
-        when(userService.userExists(testUser.getUsername())).thenReturn(false);
-        List<Follow> result = followController.getFollowing(testUser.getUsername());
-        assertEquals(new ArrayList<>(), result);
-    }
-
-    @Test
-    public void testGetFollowingEmptyUserId() {
-        List<Follow> result = followController.getFollowing("");
-        assertEquals(new ArrayList<>(), result);
     }
 }

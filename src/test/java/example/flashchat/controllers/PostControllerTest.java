@@ -2,6 +2,9 @@ package example.flashchat.controllers;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.junit.jupiter.api.Test;
@@ -11,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
 import example.flashchat.models.Post;
 import example.flashchat.models.User;
@@ -32,12 +35,14 @@ public class PostControllerTest {
     private User testUser;
     private Post testPost;
 
+    private final String AUTHENTICATED_USER_USERNAME = "testuser";
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
         testUser = new User();
-        testUser.setUsername("testuser");
+        testUser.setUsername(AUTHENTICATED_USER_USERNAME);
         testUser.setPassword("password");
 
         testPost = new Post();
@@ -45,79 +50,82 @@ public class PostControllerTest {
         testPost.setPost("test post");
     }
 
+    private Authentication createMockAuthentication(String username, boolean authenticated) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, "password", Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        authentication.setAuthenticated(authenticated);
+        return authentication;
+    }
+
     @Test
     public void testCreatePost() {
-        when(userService.userExists(testUser.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
         when(postService.createPost(any(Post.class))).thenReturn(true);
-        assertTrue(postController.createPost(testUser.getId(), "test post", null));
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+
+        assertTrue(postController.createPost(authentication, "test post", null));
     }
 
     @Test
-    public void testCreatePostEmptyUserId() {
-        assertFalse(postController.createPost("", "test post", null));
-    }
-
-    @Test
-    public void testCreatePostInvalidUserId() {
-        when(userService.userExists(testUser.getId())).thenReturn(false);
-        assertFalse(postController.createPost(testUser.getId(), "test post", null));
+    public void testCreatePostNullAuthentication() {
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        assertFalse(postController.createPost(authentication, "test post", null));
     }
 
     @Test
     public void testCreatePostEmptyPost() {
-        when(userService.userExists(testUser.getId())).thenReturn(true);
-        assertFalse(postController.createPost(testUser.getId(), "", null));
-    }
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
 
-    @Test
-    public void testGetPosts() {
-        when(postService.getPosts(testUser.getId())).thenReturn(new ArrayList<>());
-        assertTrue(postController.getPostsFromUser(testUser.getId(), 0).isEmpty());
-    }
-
-    @Test
-    public void testGetPostsInvalidUserId() {
-        when(userService.userExists(testUser.getId())).thenReturn(false);
-        assertTrue(postController.getPostsFromUser(testUser.getId(), 0).isEmpty());
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        assertFalse(postController.createPost(authentication, "", null));
     }
 
     @Test
     public void testDeletePost() {
         when(postService.deletePost(testPost.getId())).thenReturn(true);
-        when(userService.userExists(testUser.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
         when(postService.postExists(testPost.getId())).thenReturn(true);
         when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
-        assertTrue(postController.deletePost(testPost.getId(), testUser.getId()));
-    }
 
-    @Test
-    public void testDeletePostInvalidUserId() {
-        when(userService.userExists(testUser.getId())).thenReturn(false);
-        assertFalse(postController.deletePost(testPost.getId(), testUser.getId()));
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        assertTrue(postController.deletePost(authentication, testPost.getId()));
     }
 
     @Test
     public void testDeletePostInvalidPostId() {
-        when(userService.userExists(testUser.getId())).thenReturn(true);
+        when(postService.deletePost(testPost.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
         when(postService.postExists(testPost.getId())).thenReturn(false);
-        assertFalse(postController.deletePost(testPost.getId(), testUser.getId()));
+        when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
+
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        assertFalse(postController.deletePost(authentication, testPost.getId()));
     }
 
     @Test
     public void testDeletePostInvalidPostOwner() {
-        when(userService.userExists(testUser.getId())).thenReturn(true);
-        when(postService.postExists(testPost.getId())).thenReturn(true);
+        when(postService.deletePost(testPost.getId())).thenReturn(true);
+        when(userService.userExistsByUsername(testUser.getUsername())).thenReturn(true);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
+        when(postService.postExists(testPost.getId())).thenReturn(false);
         when(postService.retrievePostById(testPost.getId())).thenReturn(testPost);
-        assertFalse(postController.deletePost(testPost.getId(), testUser.getId() + "k"));
+
+        Authentication authentication = createMockAuthentication("not_the_owner", false);
+        assertFalse(postController.deletePost(authentication, testPost.getId()));
     }
 
     @Test
-    public void testDeletePostWithEmptyUserId() {
-        assertFalse(postController.deletePost(testPost.getId(), ""));
+    public void testDeletePostWithEmptyAuthentication() {
+        assertFalse(postController.deletePost(null, testPost.getId()));
     }
 
     @Test
     public void testDeletePostWithEmptyPostId() {
-        assertFalse(postController.deletePost("", testUser.getId()));
+        Authentication authentication = createMockAuthentication(AUTHENTICATED_USER_USERNAME, false);
+        assertFalse(postController.deletePost(authentication, ""));
     }
 }

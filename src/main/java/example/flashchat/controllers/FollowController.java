@@ -167,7 +167,7 @@ public class FollowController {
         }
 
         return false;
-    }
+    } // TODO: Needs Testing
 }
 
 

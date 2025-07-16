@@ -17,7 +17,7 @@ public class UserController {
     @DeleteMapping
     public boolean deleteUser(@RequestParam String userId) {
         return userService.deleteUser(userId);
-    }
+    } // TODO: Needs proper testing and completion.
 
 
     @GetMapping("/details/{userId}")
