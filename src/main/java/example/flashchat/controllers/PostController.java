@@ -125,7 +125,7 @@ public class PostController {
         List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
         incrementViews(pagedPosts);
         return pagedPosts;
-    } // TODO: Needs Testing
+    }
 
     @GetMapping("/feed/{page}")
     public List<Post> getFeed(Authentication authentication, @PathVariable int page) {
@@ -188,7 +188,7 @@ public class PostController {
         List<Post> pagedPosts = posts.subList(fromIndex, toIndex);
         incrementViews(pagedPosts);
         return pagedPosts;
-    } // TODO: Testing Required.
+    }
 
     @DeleteMapping
     public boolean deletePost(Authentication authentication, @RequestParam String postId) {
